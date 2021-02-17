@@ -1,6 +1,5 @@
 import pygame
 
-
 from game.GlobalParamsGame import GlobalParamsGame
 
 
@@ -16,8 +15,9 @@ class LandCell:
     def get_rect(self):
         return self.rect
 
-    def set_owner(self,owner):
+    def set_owner(self, owner):
         self.owner = owner
+        owner.no_already_assigned_lands+=1
 
     def set_owned(self, is_owned: bool):
         self.is_owned = is_owned
