@@ -11,7 +11,8 @@ class LandCell:
         self.owner = None
         self.x = x
         self.y = y
-
+        self.is_pollinator = False
+        self.bag_pointer = 0
     def get_rect(self):
         return self.rect
 
