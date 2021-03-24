@@ -12,7 +12,8 @@ class LandCell:
         self.x = x
         self.y = y
         self.is_pollinator = False
-        self.bag_pointer = 0
+        self.bag_pointer_declared = 0
+        self.bag_pointer_actual = 0
     def get_rect(self):
         return self.rect
 
@@ -23,5 +24,7 @@ class LandCell:
     def set_owned(self, is_owned: bool):
         self.is_owned = is_owned
 
+    def euclidian_distance(self):
+        pass
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y

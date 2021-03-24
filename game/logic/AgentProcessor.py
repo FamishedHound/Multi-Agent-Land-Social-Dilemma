@@ -29,8 +29,11 @@ class AgentProcessor:
             for cell in self.grid.all_cells.values():
                 if LandCell(agent.pos_x, agent.pos_y) == cell:
                     agent.land_cells_owned.append(cell)
-                    cell.set_owned(True)
-                    cell.set_owner(agent)
+                    self.set_ownership_of_land_piece(agent, cell)
+
+    def set_ownership_of_land_piece(self, agent, cell):
+        cell.set_owned(True)
+        cell.set_owner(agent)
 
     def distribute_unoccupied_land(self):
         done = False
@@ -52,29 +55,25 @@ class AgentProcessor:
                             cell = self.grid.all_cells[(curr_land.x + 1, curr_land.y)]
                             if not cell.is_owned:
                                 agent.land_cells_owned.append(cell)
-                                cell.set_owned(True)
-                                cell.set_owner(agent)
+                                self.set_ownership_of_land_piece(agent, cell)
                                 break
                         if curr_land.x - 1 >= 0:
                             cell = self.grid.all_cells[(curr_land.x - 1, curr_land.y)]
                             if not cell.is_owned:
                                 agent.land_cells_owned.append(cell)
-                                cell.set_owned(True)
-                                cell.set_owner(agent)
+                                self.set_ownership_of_land_piece(agent, cell)
                                 break
                         if curr_land.y + 1 < GlobalParamsGame.MAX_CELLS_NUMER:
                             cell = self.grid.all_cells[(curr_land.x, curr_land.y + 1)]
                             if not cell.is_owned:
                                 agent.land_cells_owned.append(cell)
-                                cell.set_owned(True)
-                                cell.set_owner(agent)
+                                self.set_ownership_of_land_piece(agent, cell)
                                 break
                         if curr_land.y - 1 >= 0:
                             cell = self.grid.all_cells[(curr_land.x, curr_land.y - 1)]
                             if not cell.is_owned:
                                 agent.land_cells_owned.append(cell)
-                                cell.set_owned(True)
-                                cell.set_owner(agent)
+                                self.set_ownership_of_land_piece(agent, cell)
                                 break
 
 

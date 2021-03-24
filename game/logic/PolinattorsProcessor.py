@@ -12,4 +12,4 @@ class PolinattorsProcessor:
             for _ in range(GlobalParamsAi.NUMBER_OF_RANDOM_POLLINATORS)])
         for polinattors in self.all_polinattors:
             self.grid.all_cells[polinattors].is_pollinator = True
-            self.grid.all_cells[polinattors].bag_pointer = 100
+            self.grid.all_cells[polinattors].bag_pointer_actual = 100

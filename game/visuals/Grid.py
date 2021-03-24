@@ -20,7 +20,7 @@ class Grid:
 
 
         for cell in self.all_cells.values():
-            txt_surf = font.render(str(cell.bag_pointer), True, cell.owner.color2)
+            txt_surf = font.render(str(cell.bag_pointer_actual), True, cell.owner.color2)
             if cell.is_owned:
 
                 pygame.draw.rect(GlobalParamsGame.SCREEN, cell.owner.color, cell.get_rect())
