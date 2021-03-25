@@ -13,4 +13,4 @@ class GlobalParamsGame:
 
 class GlobalParamsAi:
     NUMBER_OF_AGENTS = 40
-    NUMBER_OF_RANDOM_POLLINATORS = 12
+    NUMBER_OF_RANDOM_POLLINATORS = 10
