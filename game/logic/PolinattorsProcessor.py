@@ -18,3 +18,10 @@ class PolinattorsProcessor:
 
     def set_active_pollinator(self, land):
         self.all_polinattors.add((land.x, land.y))
+
+    def get_pollinator(self, cords):
+
+        for x, y in self.grid.all_cells.keys():
+
+            if x == cords[0] and y == cords[1]:
+                return self.grid.all_cells[(x,y)]

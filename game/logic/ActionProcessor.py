@@ -12,7 +12,7 @@ class ActionProcessor:
         self.pollinators_processor = pollinator_processor
     def all_agents_make_a_move(self):
         for agent in self.all_agents:
-            action_space_random = self.make_random_action(agent)
+            self.make_random_action(agent)
 
 
     def make_random_action(self, agent):
