@@ -25,23 +25,27 @@ def main_loop():
     agent_processor = AgentProcessor(grid=grid)
     agent_processor.seperate_land()
     print("1.")
-    #clockobject = pygame.time.Clock()
     print("1..")
     polinattor_processor = PolinattorsProcessor(grid = grid)
     print("2.")
     action_processor = ActionProcessor(all_agents=agent_processor.all_agents,pollinator_processor=polinattor_processor)
     print("3.")
-    action_processor.all_agents_make_a_move()
+    clockobject = pygame.time.Clock()
     print("4.")
     environmental_manager = EnvironmentalManager(polinattor_processor)
     environmental_manager.process_declared_lands()
     while True:
-        #clockobject.tick(10)
+        clockobject.tick(60)
+        process_pygame_events()
+        pygame.display.update()
+
+
+        action_processor.all_agents_make_a_move()
+        environmental_manager.process_declared_lands()
         grid.drawGrid()
 
 
-        process_pygame_events()
-        pygame.display.update()
+
 
 
 if __name__ == '__main__':

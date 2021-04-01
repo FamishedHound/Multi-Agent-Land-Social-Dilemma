@@ -13,7 +13,7 @@ class AgentProcessor:
         counter_agent_id = 0
         while len(self.all_agents) != GlobalParamsAi.NUMBER_OF_AGENTS:
             new_agent = Agent(counter_agent_id, random.randint(0, GlobalParamsGame.MAX_CELLS_NUMER),
-                              random.randint(0, GlobalParamsGame.MAX_CELLS_NUMER), 17)
+                              random.randint(0, GlobalParamsGame.MAX_CELLS_NUMER), 30)
             if new_agent not in self.all_agents:
                 self.all_agents.append(new_agent)
             counter_agent_id += 1
