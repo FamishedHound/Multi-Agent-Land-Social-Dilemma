@@ -34,6 +34,10 @@ class AgentProcessor:
     def set_ownership_of_land_piece(self, agent, cell):
         cell.set_owned(True)
         cell.set_owner(agent)
+    def clear_empty_agents(self):
+        for agent in self.all_agents:
+            if len(agent.land_cells_owned) ==0:
+                self.all_agents.remove(agent)
 
     def distribute_unoccupied_land(self):
         done = False

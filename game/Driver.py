@@ -20,28 +20,25 @@ def process_pygame_events():
 
 
 def main_loop():
-    print("1")
     grid = Grid()
     agent_processor = AgentProcessor(grid=grid)
     agent_processor.seperate_land()
-    print("1.")
-    print("1..")
+    agent_processor.clear_empty_agents()
     polinattor_processor = PolinattorsProcessor(grid = grid)
-    print("2.")
     action_processor = ActionProcessor(all_agents=agent_processor.all_agents,pollinator_processor=polinattor_processor)
-    print("3.")
     clockobject = pygame.time.Clock()
-    print("4.")
+
     environmental_manager = EnvironmentalManager(polinattor_processor)
     environmental_manager.process_declared_lands()
     while True:
-        clockobject.tick(60)
+        clockobject.tick(99)
         process_pygame_events()
         pygame.display.update()
 
 
         action_processor.all_agents_make_a_move()
         environmental_manager.process_declared_lands()
+        polinattor_processor.clear_pollinators()
         grid.drawGrid()
 
 
