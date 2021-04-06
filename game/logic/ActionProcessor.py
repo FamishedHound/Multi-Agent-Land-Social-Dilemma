@@ -12,7 +12,8 @@ class ActionProcessor:
         self.pollinators_processor = pollinator_processor
     def all_agents_make_a_move(self):
         for agent in self.all_agents:
-            self.make_random_action(agent)
+            if not agent.is_dead:
+                self.make_random_action(agent)
 
 
     def make_random_action(self, agent):

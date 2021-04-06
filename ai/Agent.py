@@ -15,6 +15,8 @@ class Agent:
         self.color2 = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
         self.predefined_number_of_lands = number_of_lands
         self.no_already_assigned_lands = 0
+        self.money = 0
+        self.is_dead = False
 
     def __eq__(self, other):
         return self.pos_x == other.pos_x and self.pos_y == other.pos_y

@@ -2,6 +2,7 @@ import sys
 
 import pygame
 
+from game.economy.EconomyManager import EconomyManager
 from game.logic.ActionProcessor import ActionProcessor
 from game.logic.AgentProcessor import AgentProcessor
 from game.logic.EnvironmentalManager import EnvironmentalManager
@@ -30,6 +31,8 @@ def main_loop():
 
     environmental_manager = EnvironmentalManager(polinattor_processor)
     environmental_manager.process_declared_lands()
+    economy_manager = EconomyManager(agent_processor.all_agents,polinattor_processor)
+    counter = 0
     while True:
         clockobject.tick(99)
         process_pygame_events()
@@ -39,8 +42,10 @@ def main_loop():
         action_processor.all_agents_make_a_move()
         environmental_manager.process_declared_lands()
         polinattor_processor.clear_pollinators()
+        economy_manager.deduce_land_fee()
         grid.drawGrid()
-
+        print(f"It is round {counter}")
+        counter+=1
 
 
 
