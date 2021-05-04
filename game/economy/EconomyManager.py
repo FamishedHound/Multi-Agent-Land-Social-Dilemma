@@ -13,7 +13,7 @@ class EconomyManager:
         self.starting_gold_multiplier = GlobalEconomyParams.STARTING_GOLD_MULTIPLIER
         self.land_fee = GlobalEconomyParams.LAND_UPCOST
         for a in all_agents:
-            a.money = 1000
+            a.money = 30000
         self.polinator_processor = pollinators_processor
 
     def deduce_land_fee(self):
@@ -34,16 +34,16 @@ class EconomyManager:
 
         for land in agent.land_cells_owned:
 
-            dict_land_euclidian = {c: distance.euclidean(c, (land.x, land.y)) for c in
+            polliator_distance_dict = {c: distance.euclidean(c, (land.x, land.y)) for c in
                                    self.polinator_processor.all_polinattors if c != (land.x, land.y)}
-            newDict = dict(filter(lambda elem: self.distance_less_than(elem[1], 3), dict_land_euclidian.items()))
+            pollinators_within_certain_distance = dict(filter(lambda elem: self.distance_less_than(elem[1], 3), polliator_distance_dict.items()))
 
             neighbourhood_actual_pollinators = [self.polinator_processor.get_pollinator(k).bag_pointer_actual for k in
-                                                newDict.keys()]
+                                                pollinators_within_certain_distance.keys()]
             cumulative_neighbour_polinattors = sum(neighbourhood_actual_pollinators)
             if cumulative_neighbour_polinattors > 100:
                 cumulative_neighbour_polinattors = 100
-            total_gross_income+= (cumulative_neighbour_polinattors - land.bag_pointer_actual) /100 * GlobalEconomyParams.MAXIMAL_INCOME
+            total_gross_income+= (cumulative_neighbour_polinattors - land.bag_pointer_declared) /100 * GlobalEconomyParams.MAXIMAL_INCOME
         return total_gross_income
 
     def distance_less_than(self, number, less_than):
