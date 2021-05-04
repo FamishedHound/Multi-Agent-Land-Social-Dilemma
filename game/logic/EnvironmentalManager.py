@@ -30,7 +30,7 @@ class EnvironmentalManager:
         self.pollinators_processor.buffer_lands = []
 
     def calculate_environmental_bag(self, closest_pollinator, land, x):
-        probability =  -0.2566034 + (2.126455 - -0.2566034)/(1 + (x/1.160579)**0.734929)
+        probability =  -0.07355621 + (0.8519887 - -0.07355621)/(1 + (x/1.361429)**0.7561517)
         # -0.07355621 + (0.8519887 - -0.07355621)/(1 + (x/1.361429)**0.7561517) #ToDo present meaaning of each coefficent of the equation
         # -0.07355621 + (0.8519887 - -0.07355621)/(1 + (x/1.361429)**0.7561517)
         # 0.000017709 + (0.2850471 - 0.000017709)/(1 + (x/1.695153)**3.722618)
