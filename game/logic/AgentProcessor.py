@@ -1,4 +1,5 @@
 from ai.Agent import Agent
+from ai.rule_based_agent import RuleBasedAgent
 from game.GlobalParamsGame import GlobalParamsAi, GlobalParamsGame
 from game.visuals.Grid import Grid
 import random
@@ -8,12 +9,17 @@ from game.visuals.LandCell import LandCell
 
 class AgentProcessor:
     def __init__(self, grid: Grid):
-        # ToDo ensure not overlaping of agents '''{0: 5, 1: 10, 2: 15}[x % 3]'''
         self.all_agents = []
         counter_agent_id = 0
+        #ToDo rewrite this shit
         while len(self.all_agents) != GlobalParamsAi.NUMBER_OF_AGENTS:
+            typee = random.uniform(0,1)
+
             new_agent = Agent(counter_agent_id, random.randint(0, GlobalParamsGame.MAX_CELLS_NUMER),
                               random.randint(0, GlobalParamsGame.MAX_CELLS_NUMER), 30)
+            if 0.3 < typee:
+                new_agent = RuleBasedAgent(counter_agent_id, random.randint(0, GlobalParamsGame.MAX_CELLS_NUMER),
+                              random.randint(0, GlobalParamsGame.MAX_CELLS_NUMER), 30,"RuleBasedAgent")
             if new_agent not in self.all_agents:
                 self.all_agents.append(new_agent)
             counter_agent_id += 1
@@ -49,6 +55,8 @@ class AgentProcessor:
                     done = False
 
             for agent in self.all_agents:
+                if agent.agent_type != None:
+                    print()
                 agent = agent
                 if agent.predefined_number_of_lands > len(agent.land_cells_owned):
                     counters = 0
