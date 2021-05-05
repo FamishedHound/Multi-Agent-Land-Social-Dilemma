@@ -13,7 +13,7 @@ class EconomyManager:
         self.starting_gold_multiplier = GlobalEconomyParams.STARTING_GOLD_MULTIPLIER
         self.land_fee = GlobalEconomyParams.LAND_UPCOST
         for a in all_agents:
-            a.money = 30000
+            a.money =50000
         self.polinator_processor = pollinators_processor
 
     def deduce_land_fee(self):

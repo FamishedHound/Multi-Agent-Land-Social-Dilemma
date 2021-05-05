@@ -22,10 +22,11 @@ def process_pygame_events():
 
 def main_loop():
     grid = Grid()
-    agent_processor = AgentProcessor(grid=grid)
+
+    polinattor_processor = PolinattorsProcessor(grid = grid)
+    agent_processor = AgentProcessor(grid=grid,pollinators_processor=polinattor_processor)
     agent_processor.seperate_land()
     agent_processor.clear_empty_agents()
-    polinattor_processor = PolinattorsProcessor(grid = grid)
     action_processor = ActionProcessor(all_agents=agent_processor.all_agents,pollinator_processor=polinattor_processor)
     clockobject = pygame.time.Clock()
 

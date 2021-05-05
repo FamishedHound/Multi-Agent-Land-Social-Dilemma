@@ -8,18 +8,19 @@ from game.visuals.LandCell import LandCell
 
 
 class AgentProcessor:
-    def __init__(self, grid: Grid):
+    def __init__(self, grid: Grid, pollinators_processor):
         self.all_agents = []
         counter_agent_id = 0
-        #ToDo rewrite this shit
+        # ToDo rewrite this shit
         while len(self.all_agents) != GlobalParamsAi.NUMBER_OF_AGENTS:
-            typee = random.uniform(0,1)
+            typee = random.uniform(0, 1)
 
             new_agent = Agent(counter_agent_id, random.randint(0, GlobalParamsGame.MAX_CELLS_NUMER),
-                              random.randint(0, GlobalParamsGame.MAX_CELLS_NUMER), 30)
+                              random.randint(0, GlobalParamsGame.MAX_CELLS_NUMER), 25)
             if 0.3 < typee:
                 new_agent = RuleBasedAgent(counter_agent_id, random.randint(0, GlobalParamsGame.MAX_CELLS_NUMER),
-                              random.randint(0, GlobalParamsGame.MAX_CELLS_NUMER), 30,"RuleBasedAgent")
+                                           random.randint(0, GlobalParamsGame.MAX_CELLS_NUMER), 25, "RuleBasedAgent",
+                                           pollinators_processor)
             if new_agent not in self.all_agents:
                 self.all_agents.append(new_agent)
             counter_agent_id += 1
@@ -40,9 +41,10 @@ class AgentProcessor:
     def set_ownership_of_land_piece(self, agent, cell):
         cell.set_owned(True)
         cell.set_owner(agent)
+
     def clear_empty_agents(self):
         for agent in self.all_agents:
-            if len(agent.land_cells_owned) ==0:
+            if len(agent.land_cells_owned) == 0:
                 self.all_agents.remove(agent)
 
     def distribute_unoccupied_land(self):
@@ -87,7 +89,6 @@ class AgentProcessor:
                                 agent.land_cells_owned.append(cell)
                                 self.set_ownership_of_land_piece(agent, cell)
                                 break
-
 
                         counters += 1
 

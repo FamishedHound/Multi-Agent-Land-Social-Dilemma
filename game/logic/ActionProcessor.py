@@ -14,7 +14,7 @@ class ActionProcessor:
         for agent in self.all_agents:
             if not agent.is_dead and agent.agent_type==None:
                 self.make_random_action(agent)
-            else:
+            elif not agent.is_dead:
                 agent.make_a_decision()
 
 
