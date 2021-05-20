@@ -17,7 +17,11 @@ class EnvironmentalManager:
         return np.linalg.norm(a - b)
 
     def process_declared_lands(self):
-        for land in self.pollinators_processor.buffer_lands:
+
+        lands_to_process = [land for land in self.pollinators_processor.grid.all_cells.values() if
+                            land.bag_pointer_actual != land.bag_pointer_declared]
+
+        for land in lands_to_process:
 
             if land.bag_pointer_declared < land.bag_pointer_actual:
                 land.bag_pointer_actual = land.bag_pointer_declared

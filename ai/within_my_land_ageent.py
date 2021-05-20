@@ -18,6 +18,7 @@ class LandAgent(Agent):
     # Look out for pollinators from neighbours and free ride
 
     def make_a_decision(self):
+
         lands_to_process = [x for x in self.land_cells_owned]
         my_pollinators = self.find_my_pollinators()
         closest_pols = []
@@ -31,9 +32,8 @@ class LandAgent(Agent):
         for land in lands_to_process:
             if land.was_pollinated:
                 land.bag_pointer_declared = 0
-            else:
-                land.bag_pointer_declared = 100
-            self.pollinators_processor.buffer_lands.append(land)
+
+
 
         self.money_past.append(self.money)
 
@@ -48,3 +48,7 @@ class LandAgent(Agent):
 
     def find_my_pollinators(self):
         return [land for land in self.land_cells_owned if land.bag_pointer_actual > 0]
+
+    @staticmethod
+    def average(lst):
+        return sum(lst) / len(lst)
