@@ -18,6 +18,7 @@ class PolinattorsProcessor:
         for polinattors in self.all_polinattors:
             self.grid.all_cells[polinattors].is_pollinator = True
             self.grid.all_cells[polinattors].bag_pointer_actual = 100
+            self.grid.all_cells[polinattors].bad_pointer_declared = 100
 
     def set_active_pollinator(self, land):
         self.all_polinattors.add((land.x, land.y))
@@ -74,6 +75,6 @@ class PolinattorsProcessor:
 
     @staticmethod
     def sample_pollination(x):
-        probablity = -5.293956e-22 - (-0.004205903/-0.006729445)*(1 - math.exp((+0.006729445*x)))
+        probablity = -1.757078e-8 - (-0.02995441/0.5990879)*(1 - math.exp(-0.5990879*x))
         randy_random = random.uniform(0,1)
         return  randy_random < probablity

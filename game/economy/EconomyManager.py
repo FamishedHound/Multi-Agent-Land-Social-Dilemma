@@ -25,6 +25,7 @@ class EconomyManager:
             if fee_to_pay > a.money:
                 for land in a.land_cells_owned:
                     land.bag_pointer_actual = -1
+
                 a.is_dead = True
 
             else:
@@ -43,4 +44,5 @@ class EconomyManager:
 
             else:
                 land.was_pollinated = False
-        return total_gross_income * 0.8
+
+        return total_gross_income

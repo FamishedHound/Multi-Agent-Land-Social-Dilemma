@@ -23,15 +23,15 @@ class LandAgent(Agent):
         my_pollinators = self.find_my_pollinators()
         closest_pols = []
         for pollinator in my_pollinators:
-            closest_pols = self.find_closest_lands_in_my_farm((pollinator.x, pollinator.y), 3)
-            # if pollinator.bag_pointer_actual <= 50:
-            #     for land in closest_pols:
-            #         land.bag_pointer_declared = 30
-            #         self.pollinators_processor.buffer_lands.append(land)
-        lands_to_process = [x for x in lands_to_process if x not in closest_pols and x not in my_pollinators]
-        for land in lands_to_process:
-            if land.was_pollinated:
-                land.bag_pointer_declared = 0
+            closest_pols = self.find_closest_lands_in_my_farm((pollinator.x, pollinator.y), 2)
+            if pollinator.bag_pointer_actual <= 50:
+                for land in closest_pols:
+                    if land.bag_pointer_declared < 100:
+                        land.bag_pointer_declared += 10
+
+        remaining_lands = [x for x in lands_to_process if x not in closest_pols and x not in my_pollinators]
+        for land in remaining_lands:
+            land.bag_pointer_declared=40
 
 
 
