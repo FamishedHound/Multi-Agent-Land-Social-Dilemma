@@ -1,4 +1,5 @@
 import sys
+from time import sleep
 
 import pygame
 
@@ -46,9 +47,9 @@ def main_loop():
         economy_manager.deduce_land_fee()
         grid.drawGrid()
         print(f"It is round {counter}")
+        for agent in agent_processor.all_agents:
+            print(f"agent {agent.money}  {agent.is_dead}")
         counter+=1
-
-
 
 
 if __name__ == '__main__':

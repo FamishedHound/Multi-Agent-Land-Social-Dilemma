@@ -18,6 +18,9 @@ class Agent:
         self.no_already_assigned_lands = 0
         self.money = 0
         self.is_dead = False
+        self.last_income = None
 
     def __eq__(self, other):
         return self.pos_x == other.pos_x and self.pos_y == other.pos_y
+    def make_a_decision(self):
+        pass

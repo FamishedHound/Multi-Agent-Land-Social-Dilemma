@@ -11,11 +11,17 @@ class ActionProcessor:
         self.action_space = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
         self.pollinators_processor = pollinator_processor
     def all_agents_make_a_move(self):
+        print(len(self.all_agents))
+        counter =0
         for agent in self.all_agents:
             if not agent.is_dead and agent.agent_type==None:
                 self.make_random_action(agent)
             elif not agent.is_dead:
                 agent.make_a_decision()
+            counter+=1
+            print("done {}".format(counter))
+        print("done")
+
 
 
     def make_random_action(self, agent):

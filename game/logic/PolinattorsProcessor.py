@@ -1,4 +1,7 @@
+import math
 import random
+
+from scipy.spatial import distance
 
 from game.visuals.Grid import Grid
 from game.GlobalParamsGame import GlobalParamsAi, GlobalParamsGame
@@ -26,6 +29,12 @@ class PolinattorsProcessor:
             if x == cords[0] and y == cords[1]:
                 return self.grid.all_cells[(x, y)]
 
+    def find_closest_pollinator_to_land(self, current_point , closeness):
+        closest_pollinators = list(filter(lambda c: distance.euclidean(c, current_point) < closeness, self.all_polinattors))
+        distances = list(map(lambda c: distance.euclidean(c, current_point), closest_pollinators))
+
+        return closest_pollinators, distances
+
     def clear_pollinators(self):
         to_delete = []
         for land in self.all_polinattors:
@@ -35,3 +44,36 @@ class PolinattorsProcessor:
 
         for x in to_delete:
             self.all_polinattors.remove(x)
+
+    # I assume that if you have bees you get pollinated
+    def get_pollinated(self, land):
+        polliator_distance_dict = {c: distance.euclidean(c, (land.x, land.y)) for c in
+                                   self.all_polinattors if c != (land.x, land.y)}
+        pollinators_within_certain_distance = dict(
+            filter(lambda elem: self.distance_less_than(elem[1], 2), polliator_distance_dict.items()))
+        for other_pollinator in pollinators_within_certain_distance.keys():
+            bag_size_actual = self.get_pollinator(other_pollinator).bag_pointer_actual
+            result = self.sample_pollination(bag_size_actual)
+            if result:
+                return True
+        result_from_this_land = self.sample_pollination(land.bag_pointer_actual)
+
+        return  result_from_this_land
+
+
+
+        # neighbourhood_actual_pollinators = [self.get_pollinator(k).bag_pointer_actual for k in
+        #                                     pollinators_within_certain_distance.keys()]
+        # cumulative_neighbour_polinattors = sum(neighbourhood_actual_pollinators)
+        # if cumulative_neighbour_polinattors > 100:
+        #     cumulative_neighbour_polinattors = 100
+
+    @staticmethod
+    def distance_less_than(number, less_than):
+        return number <= less_than
+
+    @staticmethod
+    def sample_pollination(x):
+        probablity = -5.293956e-22 - (-0.004205903/-0.006729445)*(1 - math.exp((+0.006729445*x)))
+        randy_random = random.uniform(0,1)
+        return  randy_random < probablity
