@@ -70,7 +70,7 @@ class RuleBasedAgent(Agent):
                                               key=lambda i: distance.euclidean(land, i))[:n]
                 new_land_mapping[land] = closest_owned_points
                 buffer_all_lands = set(buffer_all_lands) - set(closest_owned_points) - set(land)
-                print()
+
         if len(buffer_all_lands) > 1:
             new_land_mapping[buffer_all_lands[0]] = buffer_all_lands[1:0]
 

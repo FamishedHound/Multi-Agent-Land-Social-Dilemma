@@ -14,13 +14,14 @@ class EconomyManager:
         self.starting_gold_multiplier = GlobalEconomyParams.STARTING_GOLD_MULTIPLIER
         self.land_fee = GlobalEconomyParams.LAND_UPCOST
         for a in all_agents:
-            a.money = 6000
+            a.money = 7000
         self.polinator_processor = pollinators_processor
 
     def deduce_land_fee(self):
         for a in self.all_agents:
             income = self.add_income(a)
             a.money += income
+            a.income = income
             fee_to_pay = len(a.land_cells_owned) * self.land_fee
             if fee_to_pay > a.money:
                 for land in a.land_cells_owned:
@@ -30,7 +31,7 @@ class EconomyManager:
 
             else:
                 a.money -= fee_to_pay
-            print("income {} last income {} fee : {}".format(income,a.last_income,fee_to_pay))
+
             a.last_income = income
 
     def add_income(self, agent):
@@ -44,6 +45,5 @@ class EconomyManager:
 
             else:
                 land.was_pollinated = False
-        if total_gross_income<0:
-            print()
+
         return total_gross_income
