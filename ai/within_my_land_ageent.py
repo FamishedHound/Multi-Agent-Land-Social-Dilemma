@@ -4,6 +4,8 @@ from ai.Agent import Agent
 
 from copy import deepcopy
 
+from game.GlobalParamsGame import GlobalEconomyParams
+
 
 class LandAgent(Agent):
 
@@ -13,29 +15,59 @@ class LandAgent(Agent):
         self.agent_type = agent_type
         self.pollinators_processor = pollinators_processor
         self.money_past = []
+        self.average_past = []
+        self.pollination_memory = {}
+        self.my_fees = len(self.land_cells_owned) * GlobalEconomyParams.LAND_UPCOST
+        self.observation_counter = 0
 
     # If I have pollinator where it can pollinate
     # Look out for pollinators from neighbours and free ride
 
     def make_a_decision(self):
+        if not self.pollination_memory:
+            self.pollination_memory = {(k.x, k.y): [] for k in self.land_cells_owned}
+        if self.observation_counter <= 4:
+            self.take_observation_of_pollination()
+            self.observation_counter += 1
 
-        lands_to_process = [x for x in self.land_cells_owned]
-        my_pollinators = self.find_my_pollinators()
-        closest_pols = []
-        for pollinator in my_pollinators:
-            closest_pols = self.find_closest_lands_in_my_farm((pollinator.x, pollinator.y), 2)
-            if pollinator.bag_pointer_actual <= 50:
-                for land in closest_pols:
-                    if land.bag_pointer_declared < 100:
-                        land.bag_pointer_declared += 10
+        else:
+            lands_to_process = [x for x in self.land_cells_owned]
+            my_pollinators = self.find_my_pollinators()
+            closest_pols = []
+            for pollinator in my_pollinators:
+                closest_pols = self.find_closest_lands_in_my_farm((pollinator.x, pollinator.y), 2)
+                if pollinator.bag_pointer_actual == 100:
+                    for x in closest_pols:
+                        x.bag_pointer_declared = 0
 
-        remaining_lands = [x for x in lands_to_process if x not in closest_pols and x not in my_pollinators]
-        for land in remaining_lands:
-            land.bag_pointer_declared=40
+            remaining_lands = [x for x in lands_to_process if x not in closest_pols and x not in my_pollinators]
 
-
+            self.analyze_current_situation(remaining_lands)
 
         self.money_past.append(self.money)
+
+    def analyze_current_situation(self, lands_to_analyze):
+
+        for k, v in self.pollination_memory.items():
+            for land in lands_to_analyze:
+                landCell_pollinator = self.pollinators_processor.get_pollinator(k)
+                if landCell_pollinator.x == land.x and \
+                        landCell_pollinator.y == land.y:
+
+                    proportion = sum(v) / len(v)
+                    if proportion <= 0.05:
+                        landCell_pollinator.bag_pointer_declared = 100
+                    elif proportion >= 0.05 and proportion <= 0.20:
+                        landCell_pollinator.bag_pointer_declared = 60
+                    else:
+                        landCell_pollinator.bag_pointer_declared = 0
+
+    def take_observation_of_pollination(self):
+        for land in self.land_cells_owned:
+            if land.was_pollinated:
+                self.pollination_memory[(land.x, land.y)].append(1)
+            else:
+                self.pollination_memory[(land.x, land.y)].append(0)
 
     def find_closest_lands_in_my_farm(self, current_point, closeness):
         closest_lands = list(

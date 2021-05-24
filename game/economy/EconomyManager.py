@@ -30,7 +30,7 @@ class EconomyManager:
 
             else:
                 a.money -= fee_to_pay
-            print("income {} last income {}".format(income,a.last_income))
+            print("income {} last income {} fee : {}".format(income,a.last_income,fee_to_pay))
             a.last_income = income
 
     def add_income(self, agent):
@@ -44,5 +44,6 @@ class EconomyManager:
 
             else:
                 land.was_pollinated = False
-
+        if total_gross_income<0:
+            print()
         return total_gross_income

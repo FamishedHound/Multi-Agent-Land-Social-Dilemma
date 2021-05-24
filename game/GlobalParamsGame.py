@@ -16,6 +16,6 @@ class GlobalParamsAi:
     NUMBER_OF_RANDOM_POLLINATORS = 20
 
 class GlobalEconomyParams:
-    LAND_UPCOST = 15
+    LAND_UPCOST = 10
     STARTING_GOLD_MULTIPLIER =10000
     MAXIMAL_INCOME = 100
