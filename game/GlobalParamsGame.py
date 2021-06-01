@@ -13,9 +13,9 @@ class GlobalParamsGame:
 
 class GlobalParamsAi:
     NUMBER_OF_AGENTS = 20
-    NUMBER_OF_RANDOM_POLLINATORS = 20
+    NUMBER_OF_RANDOM_POLLINATORS = 10
 
 class GlobalEconomyParams:
-    LAND_UPCOST =20
+    LAND_UPCOST =10
     STARTING_GOLD_MULTIPLIER =10000
     MAXIMAL_INCOME = 100

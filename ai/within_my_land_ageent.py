@@ -66,7 +66,7 @@ class LandAgent(Agent):
             self.emergency_counter+=1
         elif self.emergency_counter>=0:
             self.emergency_counter-=1
-        print(self.emergency_counter)
+
         if self.emergency_counter==3:
             for land in self.land_cells_owned:
                 if land.bag_pointer_actual < 100:
