@@ -1,6 +1,6 @@
-from scipy.spatial import distance
-import json
-bla = '''{"a":true}'''
-output = json.loads(bla)
-print(output)
-print(bla['a'])
+import numpy as np
+arr = np.array([[[1,2,3],[3,5,3]],[[1,2,3],[3,5,3]]])
+stack = np.stack(arr)
+print(arr)
+
+print()

@@ -13,7 +13,10 @@ class Grid:
         from game.visuals.LandCell import LandCell
         self.all_cells = {(x, y): LandCell(x, y) for x in range(GlobalParamsGame.MAX_CELLS_NUMER) for y in
                           range(GlobalParamsGame.MAX_CELLS_NUMER)}
-
+    def get_cell(self,cords):
+        for k,v in self.all_cells.items():
+            if k == cords:
+                return v
     def drawGrid(self):
         pygame.font.init()
         font = pygame.font.SysFont("Grobold", 25,italic=True)

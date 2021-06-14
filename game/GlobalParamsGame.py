@@ -7,12 +7,12 @@ class GlobalParamsGame:
     WHITE = (229, 255, 204)
     WINDOW_HEIGHT = 600
     WINDOW_WIDTH = 600
-    BLOCKSIZE = 40
+    BLOCKSIZE = 200
     SCREEN = pygame.display.set_mode((WINDOW_HEIGHT, WINDOW_WIDTH))
     MAX_CELLS_NUMER = int(WINDOW_HEIGHT / BLOCKSIZE)
 
 class GlobalParamsAi:
-    NUMBER_OF_AGENTS = 20
+    NUMBER_OF_AGENTS = 9
     NUMBER_OF_RANDOM_POLLINATORS = 10
 
 class GlobalEconomyParams:

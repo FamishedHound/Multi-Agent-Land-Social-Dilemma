@@ -12,32 +12,42 @@ class AgentProcessor:
     def __init__(self, grid: Grid, pollinators_processor):
         self.all_agents = []
         counter_agent_id = 0
+        self.grid = grid
+        self.agents_pos_memory = set()
         # ToDo rewrite this shit
         while len(self.all_agents) != GlobalParamsAi.NUMBER_OF_AGENTS:
-            # typee = random.uniform(0, 1)
-            #
-            # new_agent = Agent(counter_agent_id, random.randint(0, GlobalParamsGame.MAX_CELLS_NUMER),
-            #                   random.randint(0, GlobalParamsGame.MAX_CELLS_NUMER), 25)
-            # if 0.3 < typee:
-            new_agent = LandAgent(counter_agent_id, random.randint(0, GlobalParamsGame.MAX_CELLS_NUMER),
-                                       random.randint(0, GlobalParamsGame.MAX_CELLS_NUMER), 25, "RuleBasedAgent",
+            x,y = self.generate_two_random_numbers_that_does_not_hold_agent()
+            cell =self.grid.get_cell((x,y))
+
+
+            new_agent = LandAgent(counter_agent_id, x,
+                                       y, 25, "RuleBasedAgent",
                                        pollinators_processor)
+            new_agent.land_cells_owned.append(cell)
+            self.set_ownership_of_land_piece(new_agent, cell)
             if new_agent not in self.all_agents:
                 self.all_agents.append(new_agent)
             counter_agent_id += 1
         self.grid = grid
+    def generate_two_random_numbers_that_does_not_hold_agent(self):
+        while True:
 
+            x = random.randint(0, GlobalParamsGame.MAX_CELLS_NUMER-1)
+            y = random.randint(0, GlobalParamsGame.MAX_CELLS_NUMER-1)
+            if (x,y) not in self.agents_pos_memory:
+                self.agents_pos_memory.add((x,y))
+                return x,y
     def seperate_land(self):
 
-        self.generate_agents_intial_positions()
+        #self.generate_agents_intial_positions()
         self.distribute_unoccupied_land()
 
-    def generate_agents_intial_positions(self):
-        for agent in self.all_agents:
-            for cell in self.grid.all_cells.values():
-                if LandCell(agent.pos_x, agent.pos_y) == cell:
-                    agent.land_cells_owned.append(cell)
-                    self.set_ownership_of_land_piece(agent, cell)
+    # def generate_agents_intial_positions(self):
+    #     for agent in self.all_agents:
+    #         for cell in self.grid.all_cells.values():
+    #             if LandCell(agent.pos_x, agent.pos_y) == cell:
+    #                 agent.land_cells_owned.append(cell)
+    #                 self.set_ownership_of_land_piece(agent, cell)
 
     def set_ownership_of_land_piece(self, agent, cell):
         cell.set_owned(True)
