@@ -1,4 +1,5 @@
 from ai.Agent import Agent
+from ai.MADDPG_agent import MADDPGAGENT
 from ai.rule_based_agent import RuleBasedAgent
 from ai.within_my_land_ageent import LandAgent
 from game.GlobalParamsGame import GlobalParamsAi, GlobalParamsGame
@@ -20,9 +21,8 @@ class AgentProcessor:
             cell =self.grid.get_cell((x,y))
 
 
-            new_agent = LandAgent(counter_agent_id, x,
-                                       y, 25, "RuleBasedAgent",
-                                       pollinators_processor)
+            new_agent = MADDPGAGENT(counter_agent_id, x,
+                                       y, 25, "RuleBasedAgent")
             new_agent.land_cells_owned.append(cell)
             self.set_ownership_of_land_piece(new_agent, cell)
             if new_agent not in self.all_agents:

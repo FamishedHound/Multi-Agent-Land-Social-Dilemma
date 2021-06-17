@@ -2,6 +2,7 @@ import random
 
 from typing import List
 
+from game.GlobalParamsGame import GlobalEconomyParams
 from game.visuals.LandCell import LandCell
 
 
@@ -20,9 +21,8 @@ class Agent:
         self.is_dead = False
         self.last_income = None
 
-        self.money = 7000
+        self.money = GlobalEconomyParams.STARTING_GOLD
 
     def __eq__(self, other):
         return self.pos_x == other.pos_x and self.pos_y == other.pos_y
-    def make_a_decision(self):
-        pass
+

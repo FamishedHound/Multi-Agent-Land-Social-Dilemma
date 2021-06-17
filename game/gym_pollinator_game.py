@@ -41,7 +41,15 @@ class gymDriver(gym.Env):
     def _get_reward(self):
         agent_reward = np.zeros(len(self.agent_processor.all_agents))
         for i, agent in enumerate(self.agent_processor.all_agents):
-            agent_reward[i] = agent.money
+            money = agent.money
+
+            reward = money/50000
+            if money>5000:
+                reward=1
+            if money<=0:
+                reward=0
+
+            agent_reward[i] = reward
 
         return agent_reward
 
@@ -63,7 +71,7 @@ class gymDriver(gym.Env):
         pygame.display.update()
 
     def step(self, action=None):
-        self.action_processor.all_agents_make_a_move()
+        self.action_processor.all_agents_make_a_move(action)
         self.environmental_manager.process_declared_lands()
         self.polinattor_processor.clear_pollinators()
         self.economy_manager.deduce_land_fee()

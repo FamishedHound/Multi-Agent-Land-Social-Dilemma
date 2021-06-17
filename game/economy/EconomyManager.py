@@ -11,7 +11,7 @@ class EconomyManager:
     def __init__(self, all_agents, pollinators_processor):
         self.upcost_price = GlobalEconomyParams.LAND_UPCOST
         self.all_agents = all_agents
-        self.starting_gold_multiplier = GlobalEconomyParams.STARTING_GOLD_MULTIPLIER
+        # self.starting_gold_multiplier = GlobalEconomyParams.STARTING_GOLD_MULTIPLIER
         self.land_fee = GlobalEconomyParams.LAND_UPCOST
 
         self.polinator_processor = pollinators_processor
@@ -23,16 +23,17 @@ class EconomyManager:
             a.income = income
             fee_to_pay = len(a.land_cells_owned) * self.land_fee
             if fee_to_pay > a.money:
-                for land in a.land_cells_owned:
-                    land.bag_pointer_actual = -1
-
-                a.is_dead = True
+                self.handle_dead_situation(a)
 
             else:
                 a.money -= fee_to_pay
 
             a.last_income = income
-
+    def handle_dead_situation(self,agent):
+        agent.money = GlobalEconomyParams.STARTING_GOLD
+        agent.is_dead=False
+        agent.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+        agent.color2 = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
     def add_income(self, agent):
         total_gross_income = 0
 
