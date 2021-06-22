@@ -36,7 +36,7 @@ class EnvironmentalManager:
     def calculate_environmental_bag(self, closest_pollinators_with_distance, land):
 
         for closests_pollinator, euclidian_distance in closest_pollinators_with_distance:
-            probability = math.exp(-3 * euclidian_distance)
+            probability = math.exp(-1 * euclidian_distance)
 
             self.sample_pollinator_to_create_new_one(land, probability,
                                                      self.pollinators_processor.get_pollinator(closests_pollinator))

@@ -78,6 +78,8 @@ class PolinattorsProcessor:
 
     @staticmethod
     def sample_pollination(x):
-        probablity = -1.757078e-8 - (-0.02995441 / 0.5990879) * (1 - math.exp(-0.5990879 * x))
+        probablity =  math.exp(-0.5*x)-0.2
+        if probablity <0:
+            probablity=0
         randy_random = random.uniform(0, 1)
         return randy_random < probablity

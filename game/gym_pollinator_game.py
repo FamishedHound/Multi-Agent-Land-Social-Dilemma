@@ -43,8 +43,8 @@ class gymDriver(gym.Env):
         for i, agent in enumerate(self.agent_processor.all_agents):
             money = agent.money
 
-            reward = money/50000
-            if money>5000:
+            reward = money/100000
+            if money>=100000:
                 reward=1
             if money<=0:
                 reward=0
@@ -55,15 +55,20 @@ class gymDriver(gym.Env):
 
     def _create_observation(self):
         board_size = int(GlobalParamsGame.GlobalParamsGame.WINDOW_HEIGHT / GlobalParamsGame.GlobalParamsGame.BLOCKSIZE)
+        land_per_agent_obs = []
+        for agent in self.agent_processor.all_agents:
+            single_agent_obs = []
+            for land in agent.land_cells_owned:
+                empty_obs_position = np.zeros((board_size, board_size))
+                empty_obs_declared = np.zeros((board_size, board_size))
+                empty_obs_actual = np.zeros((board_size, board_size))
+                empty_obs_position[land.x, land.y] = 1
+                empty_obs_declared[land.x, land.y] = land.bag_pointer_declared/100
+                empty_obs_actual[land.x, land.y] = land.bag_pointer_actual/100
 
-        empty_obs_declared = np.zeros((board_size, board_size))
-        empty_obs_actual = np.zeros((board_size, board_size))
-
-        for land in self.grid.all_cells.values():
-            empty_obs_declared[land.x, land.y] = land.bag_pointer_declared/100
-            empty_obs_actual[land.x, land.y] = land.bag_pointer_actual/100
-        _obs = np.array([empty_obs_declared, empty_obs_actual])
-        return _obs
+                single_agent_obs.append( np.array([empty_obs_position,empty_obs_declared, empty_obs_actual]))
+            land_per_agent_obs.append(single_agent_obs)
+        return land_per_agent_obs
 
     def render(self, mode='human'):
         self.grid.drawGrid()

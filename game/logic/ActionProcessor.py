@@ -10,16 +10,16 @@ class ActionProcessor:
         self.all_agents = all_agents
         self.action_space = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
         self.pollinators_processor = pollinator_processor
-
+        self.epsilon = 1
     def all_agents_make_a_move(self, actions):
-        agents_actions = zip(self.all_agents, actions)
+
         counter = 0
-        for i, x in enumerate(agents_actions):
-            agent, actions = x
-            if not agent.is_dead and agent.agent_type == None:
-                agent.make_a_decision(i, actions)
-            elif not agent.is_dead:
-                agent.make_a_decision(i, actions)
+        print(f"epsilon is {self.epsilon}")
+        for  agent in self.all_agents:
+
+
+            agent.make_a_decision(actions[agent.agent_id],self.epsilon)
+
             counter += 1
 
     def make_random_action(self, agent):
