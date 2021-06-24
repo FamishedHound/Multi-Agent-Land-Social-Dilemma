@@ -39,19 +39,15 @@ class gymDriver(gym.Env):
         return self._create_observation()
 
     def _get_reward(self):
-        agent_reward = np.zeros(len(self.agent_processor.all_agents))
+        agents_rewards = []
         for i, agent in enumerate(self.agent_processor.all_agents):
-            money = agent.money
+            agent_land_rewards = []
+            for land in agent.land_cells_owned:
+                reward = land.last_income/100
+                agent_land_rewards.append(reward)
 
-            reward = money/100000
-            if money>=100000:
-                reward=1
-            if money<=0:
-                reward=0
-
-            agent_reward[i] = reward
-
-        return agent_reward
+            agents_rewards.append(agent_land_rewards)
+        return np.array(agents_rewards)
 
     def _create_observation(self):
         board_size = int(GlobalParamsGame.GlobalParamsGame.WINDOW_HEIGHT / GlobalParamsGame.GlobalParamsGame.BLOCKSIZE)

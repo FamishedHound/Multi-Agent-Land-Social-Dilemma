@@ -18,7 +18,7 @@ class MADDPGAGENT(Agent):
         return random.choice(a)
     def make_a_decision(self, action,epsilon):
 
-        print(action)
+
         for i,land in enumerate(self.land_cells_owned):
 
             bad_size_declared = self.select_action(action[i])

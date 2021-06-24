@@ -11,14 +11,13 @@ class ActionProcessor:
         self.action_space = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
         self.pollinators_processor = pollinator_processor
         self.epsilon = 1
+
     def all_agents_make_a_move(self, actions):
 
         counter = 0
         print(f"epsilon is {self.epsilon}")
-        for  agent in self.all_agents:
-
-
-            agent.make_a_decision(actions[agent.agent_id],self.epsilon)
+        for i, agent in enumerate(self.all_agents):
+            agent.make_a_decision(actions[i], self.epsilon)
 
             counter += 1
 

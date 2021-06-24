@@ -16,6 +16,7 @@ class LandCell:
         self.bag_pointer_actual = 0
         self.was_pollinated = False
         self.dead = False
+        self.last_income = 0
     def get_rect(self):
         return self.rect
 
