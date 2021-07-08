@@ -52,9 +52,9 @@ class MADDPG:
 
         self.var = [1.0 for _ in range(n_agents)]
         self.critic_optimizer = [Adam(x.parameters(),
-                                      lr=0.001) for x in self.critics]
+                                      lr=3e-2) for x in self.critics]
         self.actor_optimizer = [Adam(x.parameters(),
-                                     lr=0.001) for x in self.actors]
+                                     lr=3e-2) for x in self.actors]
 
         if self.use_cuda:
             for x in self.actors:
