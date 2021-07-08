@@ -1,3 +1,5 @@
+from random import uniform
+
 import gym
 import sys
 from time import sleep
@@ -43,7 +45,15 @@ class gymDriver(gym.Env):
         for i, agent in enumerate(self.agent_processor.all_agents):
             agent_land_rewards = []
             for land in agent.land_cells_owned:
-                reward = land.last_income/100
+                # reward = land.last_income/100
+                if land.bag_pointer_declared == 50:
+                    reward = 0
+                elif land.bag_pointer_declared == 100:
+                    reward =0
+                elif land.bag_pointer_declared == 20 :
+                    reward = 1
+                else:
+                    reward =0
                 agent_land_rewards.append(reward)
 
             agents_rewards.append(agent_land_rewards)
@@ -76,6 +86,8 @@ class gymDriver(gym.Env):
         self.environmental_manager.process_declared_lands()
         self.polinattor_processor.clear_pollinators()
         self.economy_manager.deduce_land_fee()
+        bla = [self.polinattor_processor.get_pollinator(x).bag_pointer_declared for x in self.grid.all_cells]
+        print(f"{bla}")
         return self._create_observation(), self._get_reward(), 0, None
 
 

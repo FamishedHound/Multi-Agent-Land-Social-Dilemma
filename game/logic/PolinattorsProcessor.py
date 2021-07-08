@@ -62,9 +62,9 @@ class PolinattorsProcessor:
             result = self.sample_pollination(bag_size_actual)
             if result:
                 return True
-        result_from_this_land = self.sample_pollination(land.bag_pointer_actual)
+        #result_from_this_land = self.sample_pollination(land.bag_pointer_actual) #ToDo for learning purpose
 
-        return result_from_this_land
+        return False
 
         # neighbourhood_actual_pollinators = [self.get_pollinator(k).bag_pointer_actual for k in
         #                                     pollinators_within_certain_distance.keys()]
@@ -78,7 +78,7 @@ class PolinattorsProcessor:
 
     @staticmethod
     def sample_pollination(x):
-        probablity =  math.exp(-0.5*x)-0.2
+        probablity =  388002.6 + (0.07688343 - 388002.6)/(1 + (x/226532.3)**1.752205)
         if probablity <0:
             probablity=0
         randy_random = random.uniform(0, 1)

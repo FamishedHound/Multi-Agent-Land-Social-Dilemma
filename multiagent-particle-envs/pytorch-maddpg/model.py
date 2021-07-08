@@ -13,7 +13,7 @@ class Critic(nn.Module):
         #act_dim = self.dim_action * n_agent
         #ToDo Zastanow sie co powinien krytyk dostawac czy per land czy nie.
         act_dim = 1
-        self.FC1 = nn.Linear(108, 1024)
+        self.FC1 = nn.Linear(dim_observation, 1024)
         self.FC2 = nn.Linear(1024+act_dim, 512)
         self.FC3 = nn.Linear(512, 300)
         self.FC4 = nn.Linear(300, 1)

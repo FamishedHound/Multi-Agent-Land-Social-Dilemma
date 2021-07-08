@@ -54,7 +54,7 @@ class MADDPG:
         self.critic_optimizer = [Adam(x.parameters(),
                                       lr=0.001) for x in self.critics]
         self.actor_optimizer = [Adam(x.parameters(),
-                                     lr=0.0001) for x in self.actors]
+                                     lr=0.001) for x in self.actors]
 
         if self.use_cuda:
             for x in self.actors:
@@ -97,15 +97,18 @@ class MADDPG:
             # reward_batch = th.stack(batch.rewards).type(FloatTensor)
             S = np.stack([x[agent_index] for x in batch.states ])
             S = S.reshape(-1, *S.shape[2:])
+
             S_prime = np.stack([x[agent_index] for x in batch.next_states ])
             S_prime = S_prime.reshape(-1, *S_prime.shape[2:])
             action = np.stack([x[agent_index] for x in batch.actions ])
             action = action.reshape(-1, *action.shape[2:])
+            #print(f"actions now {action}")
             reward_batch = np.stack([x[agent_index] for x in batch.rewards])
             reward_batch = reward_batch.reshape(-1, *reward_batch.shape[2:])
-            reward_batch = th.from_numpy(reward_batch)
-            S_with_action = zip(th.from_numpy(S), th.from_numpy(action))
-            print()
+            reward_batch = th.from_numpy(reward_batch).cuda()
+            S_with_action = zip(th.from_numpy(S).cuda(), th.from_numpy(action).cuda())
+            #print(f" reward { reward_batch}")
+            #print(f"S prime {S_prime}")
 
             # : (batch_size_non_final) x n_agents x dim_obs
             # ToDo Turn it on for batching or different local obs
@@ -122,7 +125,7 @@ class MADDPG:
             current_Q = [
                 self.critics[agent_index](current_land.float(), land_action) for
                 current_land, land_action in S_with_action]  # S,a
-            current_Q = th.stack([x for x in current_Q]).squeeze()
+            current_Q = th.stack([x for x in current_Q]).squeeze().cuda()
             # Consier for batching
             # ToDo Turn it on for batching or different local obs
             # non_final_next_actions = [
@@ -131,10 +134,11 @@ class MADDPG:
             #                                                 :]) for i in range(
             #                                                     self.n_agents)]
 
-            non_final_next_actions = [self.actors_target[agent_index](th.from_numpy(land_prime).unsqueeze(0).float())
+            non_final_next_actions = [self.actors_target[agent_index](th.from_numpy(land_prime).unsqueeze(0).float().cuda())
                                       for land_prime in S_prime]
             # S' => a'
             non_final_next_actions = th.stack([x for x in non_final_next_actions]).squeeze()
+            #print(f"{non_final_next_actions} output of future actions")
             S_prime_action_prime = zip(th.from_numpy(S_prime), non_final_next_actions)
             # ToDo Turn it on for batching or different local obs
             # non_final_next_actions = th.stack(non_final_next_actions)
@@ -162,8 +166,8 @@ class MADDPG:
             # ).squeeze()
 
             target_Q = [self.critics_target[agent_index](
-                future_land.unsqueeze(0).float(),
-                future_action
+                future_land.unsqueeze(0).float().cuda(),
+                future_action.cuda()
             ) for future_land, future_action in S_prime_action_prime]  # S' a'
             target_Q = th.stack([x for x in target_Q]).squeeze()
             # scale_reward: to scale reward in Q functions
@@ -183,6 +187,7 @@ class MADDPG:
             loss_Q = nn.MSELoss()(current_Q.float(), target_Q.float().detach())
             #print(loss_Q.item())
             loss_Q.backward()
+            print(f"lossQ {loss_Q}")
             self.critic_optimizer[agent_index].step()
 
             # self.actor_optimizer[agent_index].zero_grad()
@@ -211,15 +216,18 @@ class MADDPG:
             # self.actor_optimizer[agent_index].step()
             # c_loss.append(loss_Q)
             # a_loss.append(actor_loss)
-            state_i = S
-            action_i = [self.actors[agent_index](th.from_numpy(state).unsqueeze(0).float()) for state in state_i]
+            state_i = S.copy()
+            action_i = [self.actors[agent_index](th.from_numpy(state).unsqueeze(0).float().cuda()) for state in state_i]
 
             state_i_with_action_i = zip(state_i,action_i)
-            actor_loss = [-self.critics[agent_index](th.from_numpy(whole_state).float(), whole_action) for whole_state,whole_action in state_i_with_action_i]
+            actor_loss = [-self.critics[agent_index](th.from_numpy(whole_state).float().cuda(), whole_action.cuda()) for whole_state,whole_action in state_i_with_action_i]
             #ToDO ask LEANDRO WHAT SHOULD HAPPEN HERE
 
             actor_loss = th.stack([x.view(1, -1) for x in actor_loss]).mean()
+            print(f"{actor_loss} actor loss")
+
             actor_loss.backward()
+            print(actor_loss)
             self.actor_optimizer[agent_index].step()
             c_loss.append(loss_Q)
             a_loss.append(actor_loss)
@@ -228,7 +236,7 @@ class MADDPG:
             for i in range(self.n_agents):
                 soft_update(self.critics_target[i], self.critics[i], self.tau)
                 soft_update(self.actors_target[i], self.actors[i], self.tau)
-
+        print("end of ITERATION")
         return c_loss, a_loss
 
     def select_action(self, state_batch, all_agents):
@@ -244,9 +252,10 @@ class MADDPG:
             sb = state_batch[agent_index]
             agent_actions = []
             for i, land in enumerate(agent.land_cells_owned):
-                land_obs = th.from_numpy(sb[i]).float()
+                land_obs = th.from_numpy(sb[agent_index]).float()
+                #land_obs = th.rand((3,2,2))
 
-                agent_actions.append(self.actors[agent_index](land_obs.unsqueeze(0)).squeeze().data.cpu())
+                agent_actions.append(self.actors[agent_index](land_obs.unsqueeze(0).cuda()).squeeze().data.cpu())
 
             actions.append(agent_actions)
         return actions

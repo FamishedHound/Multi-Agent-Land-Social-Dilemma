@@ -32,7 +32,7 @@ world.seed(1234)
 n_states = 213
 n_actions = 1
 capacity = 1000000
-batch_size = 30
+batch_size = 10
 
 n_episode = 20000
 max_steps = 100000
@@ -42,10 +42,10 @@ win = None
 param = None
 obs = world.reset()
 # initialization of the objeects is after reset that's why it's here
-
+dims = np.array(obs)
 n_agents = world.n_agents
 print("1")
-maddpg = MADDPG(world.n_agents, 108, n_actions, batch_size, capacity,
+maddpg = MADDPG(world.n_agents, dims.shape[0]*dims.shape[1]*dims.shape[2], n_actions, batch_size, capacity,
                 episodes_before_train)
 
 print("2")
@@ -64,11 +64,13 @@ for i_episode in range(n_episode):
         # if i_episode % 100 == 0 and e_render:
         world.render()
         # obs = obs.type(FloatTensor)
-        if epsilon > 0 :
+        randy_random = random.uniform(0,1)
+        if randy_random < epsilon :
             action = make_random_action(worlds_all_agents)
         else:
+            # maddpg.batch_size= 32
             action = maddpg.select_action(obs, worlds_all_agents)
-
+            print(f" action for the game{action}")
         #action = th.from_numpy(action_np)
         obs_, reward, done, _ = world.step(action)
 
@@ -88,7 +90,7 @@ for i_episode in range(n_episode):
 
         c_loss, a_loss = maddpg.update_policy(worlds_all_agents)
         maddpg.episode_done += 1
-        epsilon -= 1e-2
+        epsilon -= 1e-3
         print(f"actual epsilon {epsilon}")
     maddpg.episode_done += 1
     # print('Episode: %d, reward = %f' % (i_episode, total_reward))
