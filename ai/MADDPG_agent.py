@@ -21,7 +21,7 @@ class MADDPGAGENT(Agent):
 
         for i,land in enumerate(self.land_cells_owned):
 
-            bad_size_declared = self.select_action(action[i])
+            bad_size_declared = self.select_action(action[i].item())
             land.bag_pointer_declared = bad_size_declared
 
 

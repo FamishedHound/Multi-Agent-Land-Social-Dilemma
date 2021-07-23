@@ -1,4 +1,5 @@
 import random
+from time import sleep
 
 from MADDPG import MADDPG
 import numpy as np
@@ -6,6 +7,8 @@ import torch as th
 
 from game.gym_pollinator_game import gymDriver
 from params import scale_reward
+
+
 def make_random_action(all_agents):
     action = []
     for agent in all_agents:
@@ -32,26 +35,26 @@ world.seed(1234)
 n_states = 213
 n_actions = 1
 capacity = 1000000
-batch_size = 10
+batch_size = 40
 
 n_episode = 20000
 max_steps = 100000
 episodes_before_train = 10
-epsilon = 1
+epsilon = 2
 win = None
 param = None
 obs = world.reset()
 # initialization of the objeects is after reset that's why it's here
 dims = np.array(obs)
 n_agents = world.n_agents
-print("1")
-maddpg = MADDPG(world.n_agents, dims.shape[0]*dims.shape[1]*dims.shape[2], n_actions, batch_size, capacity,
+
+maddpg = MADDPG(world.n_agents, dims.shape[0] * dims.shape[1] * dims.shape[2], n_actions, batch_size, capacity,
                 episodes_before_train)
 
-print("2")
+world.clockobject.tick(99)
 FloatTensor = th.cuda.FloatTensor if maddpg.use_cuda else th.FloatTensor
 for i_episode in range(n_episode):
-    print("3")
+
     obs = world.reset()
     worlds_all_agents = world.agent_processor.all_agents
     # obs = np.stack(obs)
@@ -64,15 +67,28 @@ for i_episode in range(n_episode):
         # if i_episode % 100 == 0 and e_render:
         world.render()
         # obs = obs.type(FloatTensor)
-        randy_random = random.uniform(0,1)
-        if randy_random < epsilon :
+        randy_random = random.uniform(0, 1)
+        if epsilon > 0:
+            action = maddpg.select_action(obs, worlds_all_agents)
+            print(f" NEURAL ACTION  {action}")
             action = make_random_action(worlds_all_agents)
         else:
             # maddpg.batch_size= 32
             action = maddpg.select_action(obs, worlds_all_agents)
-            print(f" action for the game{action}")
-        #action = th.from_numpy(action_np)
-        obs_, reward, done, _ = world.step(action)
+            print(f" NEURAL ACTION  {action}")
+            sleep(5)
+
+        # randy_random_2 = random.randint(0,1)
+        # if randy_random_2 ==0:
+        #     action = [[th.tensor(0.2)]]
+        # else:
+        #     action = [[th.tensor(0.6)]]
+        choice = random.uniform(0, 1)#random.choice([0.1, 0.2,0.3,0.4,0.5,0.6])
+        action = [[th.tensor(choice).float()]]
+        print(f" action for the game{action}")
+        # action = th.from_numpy(action_np)
+        # obs_, reward, done, _ = world.step(action, randy_random_2)
+        obs_, reward, done, _ = world.step(action, choice)
 
         # reward = th.FloatTensor(reward).type(FloatTensor)
         # obs_ = np.stack(obs_)
@@ -88,9 +104,10 @@ for i_episode in range(n_episode):
         maddpg.memory.push(obs, action, obs_, reward)
         obs = next_obs
 
-        c_loss, a_loss = maddpg.update_policy(worlds_all_agents)
+        c_loss, a_loss = maddpg.update_policy(worlds_all_agents, epsilon, choice)
         maddpg.episode_done += 1
-        epsilon -= 1e-3
+        if maddpg.episode_done>=batch_size:
+            epsilon -= 1e-3
         print(f"actual epsilon {epsilon}")
     maddpg.episode_done += 1
     # print('Episode: %d, reward = %f' % (i_episode, total_reward))

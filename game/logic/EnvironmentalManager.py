@@ -34,12 +34,15 @@ class EnvironmentalManager:
 
 
     def calculate_environmental_bag(self, closest_pollinators_with_distance, land):
-
+        #ToDo enable spreading
         for closests_pollinator, euclidian_distance in closest_pollinators_with_distance:
             probability = math.exp(-1 * euclidian_distance)
+            land.bag_pointer_actual = land.bag_pointer_declared
 
-            self.sample_pollinator_to_create_new_one(land, probability,
-                                                     self.pollinators_processor.get_pollinator(closests_pollinator))
+
+
+            # self.sample_pollinator_to_create_new_one(land, probability,
+            #                                          self.pollinators_processor.get_pollinator(closests_pollinator))
 
     def sample_pollinator_to_create_new_one(self, land, probability, pollinator):
         randy_random = uniform(0, 1)

@@ -1,4 +1,4 @@
-from random import uniform
+from random import uniform, random, choice,randint
 
 import gym
 import sys
@@ -44,20 +44,40 @@ class gymDriver(gym.Env):
         agents_rewards = []
         for i, agent in enumerate(self.agent_processor.all_agents):
             agent_land_rewards = []
+            reward = 0
             for land in agent.land_cells_owned:
                 # reward = land.last_income/100
                 if land.bag_pointer_declared == 50:
-                    reward = 0
+                    reward = -1
                 elif land.bag_pointer_declared == 100:
-                    reward =0
+                    reward =-1
                 elif land.bag_pointer_declared == 20 :
-                    reward = 1
-                else:
-                    reward =0
-                agent_land_rewards.append(reward)
 
+                    reward = 10
+                else:
+                    reward =-1
+                agent_land_rewards.append(reward)
             agents_rewards.append(agent_land_rewards)
         return np.array(agents_rewards)
+    # def _get_reward(self):
+    #     agents_rewards = []
+    #     for i, agent in enumerate(self.agent_processor.all_agents):
+    #         agent_land_rewards = []
+    #         reward = 0
+    #         for land in agent.land_cells_owned:
+    #             reward = land.last_income/100
+    #             # if land.bag_pointer_declared == 60 :
+    #             #     reward = 1
+    #             # elif land.bag_pointer_declared > 60:
+    #             #     reward = 60/land.bag_pointer_declared
+    #             # else:
+    #             #     reward = land.bag_pointer_declared/60
+    #             #
+    #
+    #
+    #             agent_land_rewards.append(reward)
+    #         agents_rewards.append(agent_land_rewards)
+    #     return np.array(agents_rewards)
 
     def _create_observation(self):
         board_size = int(GlobalParamsGame.GlobalParamsGame.WINDOW_HEIGHT / GlobalParamsGame.GlobalParamsGame.BLOCKSIZE)
@@ -81,14 +101,29 @@ class gymDriver(gym.Env):
         process_pygame_events()
         pygame.display.update()
 
-    def step(self, action=None):
+    def step(self, action=None,randy_random=None):
+
+
+
         self.action_processor.all_agents_make_a_move(action)
         self.environmental_manager.process_declared_lands()
         self.polinattor_processor.clear_pollinators()
         self.economy_manager.deduce_land_fee()
         bla = [self.polinattor_processor.get_pollinator(x).bag_pointer_declared for x in self.grid.all_cells]
-        print(f"{bla}")
-        return self._create_observation(), self._get_reward(), 0, None
+        print(f"Actual cells {bla}")
+
+        bla = self._create_observation()
+        # if randy_random==0:
+        #
+        #     reward = [[1]]
+        # else:
+        #
+        #     reward = [[-1]]
+        if np.array(self._create_observation())[0][0][1][0].item()==0.2:
+            reward = [[1]]
+        else:
+            reward = [[0]]
+        return self._create_observation(), reward, 0, None
 
 
 def process_pygame_events():
@@ -102,7 +137,7 @@ if __name__ == '__main__':
     gym_driver = gymDriver()
     gym_driver.reset()
     while True:
-        gym_driver.clockobject.tick(99)
+        gym_driver.clockobject.tick(5)
         gym_driver.render()
         gym_driver.step()
         gym_driver.counter += 1

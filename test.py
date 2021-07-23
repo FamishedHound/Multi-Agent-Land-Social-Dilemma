@@ -7,10 +7,7 @@ import math
 
 #
 import numpy as np
-arr = np.array([[[1,2,3],[5,6,7]],[[6,7,6],[6,6,6]]])
-arr.reshape()
-print(arr.shape)
-for x in arr:
-    print(x)
-    for y in x :
-        print(y)
+good = [[[1]], [[0.2]], [[0.2]]]
+bad = [[[1]], [[0.6]], [[0.6]]]
+
+print(np.array(good).reshape((10,3,1,1)))
