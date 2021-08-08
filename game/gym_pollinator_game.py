@@ -87,17 +87,24 @@ class gymDriver(gym.Env):
         land_per_agent_obs = []
         for agent in self.agent_processor.all_agents:
             single_agent_obs = []
+            empty_obs_actual, empty_obs_declared = self.get_global_state_without_position(board_size)
             for land in agent.land_cells_owned:
                 empty_obs_position = np.zeros((board_size, board_size))
-                empty_obs_declared = np.zeros((board_size, board_size))
-                empty_obs_actual = np.zeros((board_size, board_size))
                 empty_obs_position[land.x, land.y] = 1
-                empty_obs_declared[land.x, land.y] = land.bag_pointer_declared/100
-                empty_obs_actual[land.x, land.y] = land.bag_pointer_actual/100
+
 
                 single_agent_obs.append( np.array([empty_obs_position,empty_obs_declared, empty_obs_actual]))
             land_per_agent_obs.append(single_agent_obs)
         return land_per_agent_obs
+
+    def get_global_state_without_position(self, board_size):
+        empty_obs_declared = np.zeros((board_size, board_size))
+        empty_obs_actual = np.zeros((board_size, board_size))
+        for agent in self.agent_processor.all_agents:
+            for land in agent.land_cells_owned:
+                empty_obs_declared[land.x, land.y] = land.bag_pointer_declared / 100
+                empty_obs_actual[land.x, land.y] = land.bag_pointer_actual / 100
+        return empty_obs_actual, empty_obs_declared
 
     def render(self, mode='human'):
         self.grid.drawGrid()

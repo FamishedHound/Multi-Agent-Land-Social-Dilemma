@@ -351,11 +351,11 @@ class MADDPG:
 
             sb = state_batch[agent_index]
             agent_actions = []
-            for i, land in enumerate(state_batch[agent_index]):
+            for i, land in enumerate(sb):
                 # land_obs = th.rand((3,2,2))
-
-                agent_actions.append(self.actors[agent_index](
-                    th.from_numpy(np.array(land)).float().unsqueeze(0).cuda()).squeeze().data.cpu())
+                decision = self.actors[agent_index](
+                    th.from_numpy(np.array(land)).float().unsqueeze(0).cuda()).squeeze().data.cpu()
+                agent_actions.append(decision)
 
             actions.append(agent_actions)
         return actions

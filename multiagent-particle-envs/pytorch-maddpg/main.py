@@ -121,7 +121,7 @@ for i_episode in range(n_episode):
             if epsilon < 0.4:
                 epsilon -= 1e-4
             else:
-                epsilon -= 1e-2
+                epsilon -= 1e-3
         print(f"actual epsilon {epsilon}")
     maddpg.episode_done += 1
     # print('Episode: %d, reward = %f' % (i_episode, total_reward))
