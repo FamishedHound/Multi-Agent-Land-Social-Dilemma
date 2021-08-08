@@ -47,12 +47,7 @@ class RuleBasedAgent(Agent):
             subland_key.bag_pointer_declared = value
             self.pollinators_processor.buffer_lands.append(subland_key)
 
-    def find_closest_pollinator_to_land(self, current_point):
-        closest_pollinators = list(
-            filter(lambda c: distance.euclidean(c, current_point) < 3, self.pollinators_processor.all_polinattors))
 
-
-        return closest_pollinators
 
     def get_polinattors_potential(self,land_cords):
         pass

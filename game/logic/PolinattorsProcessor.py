@@ -20,7 +20,7 @@ class PolinattorsProcessor:
             self.get_pollinator(polinattors).bag_pointer_declared = 100
             self.get_pollinator(polinattors).bag_pointer_actual = 100
             self.grid.all_cells[polinattors].is_pollinator = True
-            self.grid.all_cells[polinattors].bad_pointer_declared = 100
+            self.grid.all_cells[polinattors].bag_pointer_declared = 100
             self.grid.all_cells[polinattors].bag_pointer_actual = 100
 
 
@@ -50,21 +50,33 @@ class PolinattorsProcessor:
 
         for x in to_delete:
             self.all_polinattors.remove(x)
+        for l,v in self.grid.all_cells.items():
+            if v.bag_pointer_actual>0:
+                self.all_polinattors.add(l)
+    def check_for_failed_pollinators_during_exploration(self):
+
+        for land in self.all_polinattors:
+            if self.grid.all_cells[(land[0], land[1])].bag_pointer_actual != 0:
+                return False
+        return True
+
 
     # I assume that if you have bees you get pollinated
     def get_pollinated(self, land):
+
         polliator_distance_dict = {c: distance.euclidean(c, (land.x, land.y)) for c in
                                    self.all_polinattors if c != (land.x, land.y)}
         pollinators_within_certain_distance = dict(
-            filter(lambda elem: self.distance_less_than(elem[1], 3), polliator_distance_dict.items()))
+            filter(lambda elem: self.distance_less_than(elem[1], 1), polliator_distance_dict.items()))
         for other_pollinator in pollinators_within_certain_distance.keys():
             bag_size_actual = self.get_pollinator(other_pollinator).bag_pointer_actual
             result = self.sample_pollination(bag_size_actual)
+
             if result:
                 return True
-        #result_from_this_land = self.sample_pollination(land.bag_pointer_actual) #ToDo for learning purpose
+        result_from_this_land = self.sample_pollination(land.bag_pointer_actual,0) #ToDo for learning purpose
 
-        return False
+        return result_from_this_land
 
         # neighbourhood_actual_pollinators = [self.get_pollinator(k).bag_pointer_actual for k in
         #                                     pollinators_within_certain_distance.keys()]
@@ -77,9 +89,19 @@ class PolinattorsProcessor:
         return number <= less_than
 
     @staticmethod
-    def sample_pollination(x):
-        probablity =  388002.6 + (0.07688343 - 388002.6)/(1 + (x/226532.3)**1.752205)
-        if probablity <0:
-            probablity=0
-        randy_random = random.uniform(0, 1)
-        return randy_random < probablity
+    def sample_pollination(x,mode=0):
+
+        if mode ==0:
+            if x ==100:
+                return True
+            else:
+                return False
+            # probablity = 0.7627864 + (-1.579016e-7 - 0.7627864)/(1 + (x/84.04566)**13.87343)
+            # if probablity <0:
+            #     probablity=0
+            # randy_random = random.uniform(0, 1)
+            # return randy_random < probablity
+
+        else:
+            if x >=30:
+                return True

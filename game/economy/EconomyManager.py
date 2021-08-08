@@ -18,6 +18,7 @@ class EconomyManager:
 
     def deduce_land_fee(self):
         for a in self.all_agents:
+            print(f"agent lands {len(a.land_cells_owned)}")
             income = self.add_income(a)
             a.money += income
             a.income = income
@@ -40,6 +41,7 @@ class EconomyManager:
         for land in agent.land_cells_owned:
 
             if self.polinator_processor.get_pollinated(land):
+                print(f"land {(land.x, land.y)}")
                 this_land_income = (100 - land.bag_pointer_declared) / 100 * GlobalEconomyParams.MAXIMAL_INCOME
                 total_gross_income += this_land_income
                 land.was_pollinated = True

@@ -2,7 +2,7 @@ import random
 
 from ai.Agent import Agent
 from game.logic.PolinattorsProcessor import PolinattorsProcessor
-
+import numpy as np
 
 class ActionProcessor:
 
@@ -16,10 +16,12 @@ class ActionProcessor:
 
         counter = 0
         print(f"epsilon is {self.epsilon}")
+        lands_reward = []
         for i, agent in enumerate(self.all_agents):
-            agent.make_a_decision(actions[i], self.epsilon)
+            lands_reward.append(agent.make_a_decision(actions[i], self.epsilon))
 
             counter += 1
+        return lands_reward
 
     def make_random_action(self, agent):
         for land in agent.land_cells_owned:

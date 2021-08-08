@@ -19,12 +19,9 @@ import torch
 
 class gymDriver(gym.Env):
     def __init__(self):
-        self.n_agents = GlobalParamsGame.GlobalParamsAi.NUMBER_OF_AGENTS
-
-    def reset(self):
         self.grid = Grid()
-
         self.polinattor_processor = PolinattorsProcessor(grid=self.grid)
+        self.n_agents = GlobalParamsGame.GlobalParamsAi.NUMBER_OF_AGENTS
         self.agent_processor = AgentProcessor(grid=self.grid, pollinators_processor=self.polinattor_processor)
         self.agent_processor.seperate_land()
         self.agent_processor.clear_empty_agents()
@@ -36,48 +33,54 @@ class gymDriver(gym.Env):
         self.environmental_manager.process_declared_lands()
         self.economy_manager = EconomyManager(self.agent_processor.all_agents, self.polinattor_processor)
         self.counter = 0
+    def reset(self):
+
+
+        self.polinattor_processor = PolinattorsProcessor(grid=self.grid)
+
         self.n_agents = len(self.agent_processor.all_agents)
 
         return self._create_observation()
 
-    def _get_reward(self):
-        agents_rewards = []
-        for i, agent in enumerate(self.agent_processor.all_agents):
-            agent_land_rewards = []
-            reward = 0
-            for land in agent.land_cells_owned:
-                # reward = land.last_income/100
-                if land.bag_pointer_declared == 50:
-                    reward = -1
-                elif land.bag_pointer_declared == 100:
-                    reward =-1
-                elif land.bag_pointer_declared == 20 :
-
-                    reward = 10
-                else:
-                    reward =-1
-                agent_land_rewards.append(reward)
-            agents_rewards.append(agent_land_rewards)
-        return np.array(agents_rewards)
     # def _get_reward(self):
     #     agents_rewards = []
     #     for i, agent in enumerate(self.agent_processor.all_agents):
     #         agent_land_rewards = []
     #         reward = 0
     #         for land in agent.land_cells_owned:
-    #             reward = land.last_income/100
-    #             # if land.bag_pointer_declared == 60 :
-    #             #     reward = 1
-    #             # elif land.bag_pointer_declared > 60:
-    #             #     reward = 60/land.bag_pointer_declared
-    #             # else:
-    #             #     reward = land.bag_pointer_declared/60
-    #             #
+    #             # reward = land.last_income/100
+    #             if land.bag_pointer_declared == 50:
+    #                 reward = -1
+    #             elif land.bag_pointer_declared == 100:
+    #                 reward =-1
+    #             elif land.bag_pointer_declared == 20 :
     #
-    #
+    #                 reward = 1
+    #             else:
+    #                 reward =-1
     #             agent_land_rewards.append(reward)
     #         agents_rewards.append(agent_land_rewards)
     #     return np.array(agents_rewards)
+    def _get_reward(self):
+        agents_rewards = []
+        for i, agent in enumerate(self.agent_processor.all_agents):
+            agent_land_rewards = []
+            reward = 0
+            for land in agent.land_cells_owned:
+                reward = land.last_income/100
+                land=land
+                # if land.bag_pointer_declared == 60 :
+                #     reward = 1
+                # elif land.bag_pointer_declared > 60:
+                #     reward = 60/land.bag_pointer_declared
+                # else:
+                #     reward = land.bag_pointer_declared/60
+                #
+
+
+                agent_land_rewards.append(reward)
+            agents_rewards.append(agent_land_rewards)
+        return agents_rewards
 
     def _create_observation(self):
         board_size = int(GlobalParamsGame.GlobalParamsGame.WINDOW_HEIGHT / GlobalParamsGame.GlobalParamsGame.BLOCKSIZE)
@@ -102,14 +105,16 @@ class gymDriver(gym.Env):
         pygame.display.update()
 
     def step(self, action=None,randy_random=None):
+        done = False
+        if self.polinattor_processor.check_for_failed_pollinators_during_exploration():
+            self.reset()
+            done = True
 
-
-
-        self.action_processor.all_agents_make_a_move(action)
-        self.environmental_manager.process_declared_lands()
         self.polinattor_processor.clear_pollinators()
+        lands_picked = self.action_processor.all_agents_make_a_move(action)
+        self.environmental_manager.process_declared_lands()
         self.economy_manager.deduce_land_fee()
-        bla = [self.polinattor_processor.get_pollinator(x).bag_pointer_declared for x in self.grid.all_cells]
+        bla = [f"agent {i} has this : " + str(a.money) +"\n" for i,a in enumerate(self.agent_processor.all_agents)]
         print(f"Actual cells {bla}")
 
         bla = self._create_observation()
@@ -118,12 +123,32 @@ class gymDriver(gym.Env):
         #     reward = [[1]]
         # else:
         #
-        #     reward = [[-1]]
-        if np.array(self._create_observation())[0][0][1][0].item()==0.2:
-            reward = [[1]]
-        else:
-            reward = [[0]]
-        return self._create_observation(), reward, 0, None
+        # reward = []
+        # for agent_lands in lands_picked:
+        #     reward_agent_temp = []
+        #     for agent_land in agent_lands:
+        #         if agent_land==70:
+        #             reward_agent_temp.append(1)
+        #         else:
+        #             reward_agent_temp.append(0)
+        #     reward.append(reward_agent_temp)
+
+
+
+        # if np.array(self._create_observation())[0][0][1][0].item()==0.2:
+        #     reward = [[1]]
+        # else:
+        #     reward = [[0]]
+        self.render()
+        reward = self._get_reward()
+        if done:
+            reward = []
+            for agent_lands in lands_picked:
+                reward_agent_temp = []
+                for agent_land in agent_lands:
+                        reward_agent_temp.append(-1)
+                reward.append(reward_agent_temp)
+        return self._create_observation(), reward, done, None
 
 
 def process_pygame_events():
