@@ -22,14 +22,16 @@ class EnvironmentalManager:
         for land in lands_to_process:
 
             if land.bag_pointer_actual != -1:
-               # land.bag_pointer_actual = land.bag_pointer_declared
+               land.bag_pointer_actual = land.bag_pointer_declared
+               if land.bag_pointer_actual > 0:
+                   self.pollinators_processor.all_polinattors.add((land.x, land.y))
                 #turned off for NOW
-                current_point = (land.x, land.y)
-                closest_pollinators, distances = self.pollinators_processor.find_closest_pollinator_to_land(current_point,
-                                                                                                            3)
-                if closest_pollinators:
-                    self.calculate_environmental_bag(zip(closest_pollinators, distances),
-                                                     self.pollinators_processor.get_pollinator(current_point))
+                # current_point = (land.x, land.y)
+                # closest_pollinators, distances = self.pollinators_processor.find_closest_pollinator_to_land(current_point,
+                #                                                                                             3)
+                # if closest_pollinators:
+                #     self.calculate_environmental_bag(zip(closest_pollinators, distances),
+                #                                      self.pollinators_processor.get_pollinator(current_point))
 
 
 

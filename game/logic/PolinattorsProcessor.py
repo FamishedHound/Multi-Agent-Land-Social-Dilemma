@@ -67,7 +67,7 @@ class PolinattorsProcessor:
         polliator_distance_dict = {c: distance.euclidean(c, (land.x, land.y)) for c in
                                    self.all_polinattors if c != (land.x, land.y)}
         pollinators_within_certain_distance = dict(
-            filter(lambda elem: self.distance_less_than(elem[1], 1), polliator_distance_dict.items()))
+            filter(lambda elem: self.distance_less_than(elem[1], 1.9), polliator_distance_dict.items()))
         for other_pollinator in pollinators_within_certain_distance.keys():
             bag_size_actual = self.get_pollinator(other_pollinator).bag_pointer_actual
             result = self.sample_pollination(bag_size_actual)

@@ -48,7 +48,7 @@ dims = np.array(obs)
 n_agents = world.n_agents
 buffer_action = None
 buffer_counter = 0
-maddpg = MADDPG(world.n_agents, 27, n_actions, batch_size, capacity,
+maddpg = MADDPG(world.n_agents, 12, n_actions, batch_size, capacity,
                 episodes_before_train)
 
 FloatTensor = th.cuda.FloatTensor if maddpg.use_cuda else th.FloatTensor
@@ -118,10 +118,10 @@ for i_episode in range(n_episode):
         c_loss, a_loss = maddpg.update_policy(worlds_all_agents, epsilon)
         maddpg.episode_done += 1
         if maddpg.episode_done >= batch_size:
-            if epsilon < 0.4:
-                epsilon -= 1e-4
+            if epsilon < 0.1:
+                epsilon=0.1
             else:
-                epsilon -= 1e-3
+                epsilon-=1e-3
         print(f"actual epsilon {epsilon}")
     maddpg.episode_done += 1
     # print('Episode: %d, reward = %f' % (i_episode, total_reward))
