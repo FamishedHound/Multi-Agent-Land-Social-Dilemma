@@ -12,7 +12,7 @@ from params import scale_reward
 def make_random_action(all_agents):
     action = []
     for agent in all_agents:
-        agent_actions = [th.tensor(random.choice([0,0,10, 20, 30, 40, 50, 60, 70, 80, 90, 100,100,100,100])/100) for _ in range(len(agent.land_cells_owned))]
+        agent_actions = [th.tensor(random.choice([0,0,10, 20, 30, 40, 50, 60, 70, 80, 90, 100,100])/100) for _ in range(len(agent.land_cells_owned))]
 
         action.append(agent_actions)
     return action

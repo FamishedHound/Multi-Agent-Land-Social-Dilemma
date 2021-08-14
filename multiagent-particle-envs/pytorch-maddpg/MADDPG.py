@@ -54,7 +54,7 @@ class MADDPG:
         self.episodes_before_train = episodes_before_train
         loss_new = nn.BCEWithLogitsLoss()
         self.GAMMA = 0.95
-        self.tau = 0.5
+        self.tau = 0.95
         self.lst1 = []
         self.lst2 = []
         self.var = [1.0 for _ in range(n_agents)]
@@ -349,14 +349,20 @@ class MADDPG:
         for agent_index, agent in enumerate(all_agents):
             # using global
 
-            sb = state_batch[agent_index]
+            sb = np.asarray(state_batch[agent_index])
             agent_actions = []
             for i, land in enumerate(sb):
                 # land_obs = th.rand((3,2,2))
+                fluid_state = np.asarray(sb[i]).copy()
                 decision = self.actors[agent_index](
-                    th.from_numpy(np.array(land)).float().unsqueeze(0).cuda()).squeeze().data.cpu()
+                    th.from_numpy(np.array(sb[i])).float().unsqueeze(0).cuda()).squeeze().data.cpu()
                 agent_actions.append(decision)
-
+                x,y = np.where(sb[i][0]==1)
+                x= x.item()
+                y = y.item()
+                fluid_state[1][x,y] = decision
+                for j in range(sb.shape[0]):
+                    sb[j][1] = fluid_state[1]
             actions.append(agent_actions)
         return actions
 
