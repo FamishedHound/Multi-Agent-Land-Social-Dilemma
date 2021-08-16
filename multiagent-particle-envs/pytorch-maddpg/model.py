@@ -14,8 +14,8 @@ class Critic(nn.Module):
         #ToDo Zastanow sie co powinien krytyk dostawac czy per land czy nie.
         act_dim = 1
         self.FC1 = nn.Linear(dim_observation+act_dim, 1024)
-        self.FC2 = nn.Linear(1024, 4048)
-        self.FC3 = nn.Linear(4048, 512)
+        self.FC2 = nn.Linear(1024, 2048)
+        self.FC3 = nn.Linear(2048, 512)
         self.FC4 = nn.Linear(512, 1)
 
     # obs: batch_size * obs_dim

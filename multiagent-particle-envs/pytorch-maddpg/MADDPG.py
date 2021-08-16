@@ -353,16 +353,16 @@ class MADDPG:
             agent_actions = []
             for i, land in enumerate(sb):
                 # land_obs = th.rand((3,2,2))
-                fluid_state = np.asarray(sb[i]).copy()
+                fluid_state = np.asarray(land).copy()
                 decision = self.actors[agent_index](
-                    th.from_numpy(np.array(sb[i])).float().unsqueeze(0).cuda()).squeeze().data.cpu()
+                    th.from_numpy(np.array(land)).float().unsqueeze(0).cuda()).squeeze().data.cpu()
                 agent_actions.append(decision)
-                x,y = np.where(sb[i][0]==1)
-                x= x.item()
-                y = y.item()
-                fluid_state[1][x,y] = decision
-                for j in range(sb.shape[0]):
-                    sb[j][1] = fluid_state[1]
+                # x,y = np.where(sb[i][0]==1)
+                # x= x.item()
+                # y = y.item()
+                # fluid_state[1][x,y] = decision
+                # for j in range(sb.shape[0]):
+                #     sb[j][1] = fluid_state[1]
             actions.append(agent_actions)
         return actions
 
