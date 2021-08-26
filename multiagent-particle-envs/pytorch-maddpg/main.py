@@ -12,7 +12,7 @@ from params import scale_reward
 def make_random_action(all_agents):
     action = []
     for agent in all_agents:
-        agent_actions = [th.tensor(random.choice([0,0,10, 20, 30, 40, 50, 60, 70, 80, 90, 100,100])/100) for _ in range(len(agent.land_cells_owned))]
+        agent_actions = [th.tensor(random.choice([0,random.uniform(0,102)])/100) for _ in range(len(agent.land_cells_owned))]
 
         action.append(agent_actions)
     return action
@@ -35,7 +35,7 @@ world.seed(1234)
 n_states = 213
 n_actions = 1
 capacity = 1000000
-batch_size = 20
+batch_size = 64
 n_episode = 20000
 max_steps = 100000
 episodes_before_train = 10
@@ -72,7 +72,7 @@ for i_episode in range(n_episode):
 
         if epsilon > randy_random:
             action = maddpg.select_action(obs, worlds_all_agents)
-            print(f" NEURAL ACTION  {action}")
+            print(f" NEURAL ACTION  {[round(x.item(),2) for x in action[0]]}")
             action = make_random_action(worlds_all_agents)
             # if buffer_counter % 2 ==0:
             #     buffer_counter=0
@@ -86,7 +86,7 @@ for i_episode in range(n_episode):
         else:
             # maddpg.batch_size= 32
             action = maddpg.select_action(obs, worlds_all_agents)
-            print(f" NEURAL ACTION  {action}")
+            print(f" NEURAL ACTION  {[round(x.item(),2) for x in action[0]]}")
 
         # randy_random_2 = random.randint(0,1)
         # if randy_random_2 ==0:
@@ -118,10 +118,15 @@ for i_episode in range(n_episode):
         c_loss, a_loss = maddpg.update_policy(worlds_all_agents, epsilon)
         maddpg.episode_done += 1
         if maddpg.episode_done >= batch_size:
-            if epsilon < 0.1:
-                epsilon=0.1
+            # if epsilon > 0.6 :
+            #     epsilon -= 1e-3
+            # elif epsilon <  0.6 and epsilon > 0.3:
+            #     epsilon -= 1e-4
+            # el
+            if  epsilon > 0.25:
+                epsilon -= 1e-3
             else:
-                epsilon-=1e-3
+                epsilon = 0.25
         print(f"actual epsilon {epsilon}")
     maddpg.episode_done += 1
     # print('Episode: %d, reward = %f' % (i_episode, total_reward))

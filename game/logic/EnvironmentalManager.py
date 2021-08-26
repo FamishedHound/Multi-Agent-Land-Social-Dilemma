@@ -51,23 +51,26 @@ class EnvironmentalManager:
         actual_bag = land.bag_pointer_actual
         declared_bag = land.bag_pointer_declared
         if declared_bag > actual_bag and actual_bag < 100:
-
+            land.bag_pointer_actual = land.bag_pointer_declared #ToDo for debugging
             if randy_random <= probability:
+
                 result =0
-                probability_how_much_we_get = 10 * (1 + 0.03) ** pollinator.bag_pointer_actual / 100
-                randy_random = uniform(0, 1)
-                if randy_random >0 and randy_random <0.7:
-                    result +=10
-                elif randy_random>0.7 and randy_random <0.8 and actual_bag <=80:
-                    result += 20
-                elif randy_random>0.8 and randy_random <0.85 and actual_bag <=70:
-                    result += 30
-                else:
-                    result += 10
-                if actual_bag + result <= declared_bag:
-                    land.bag_pointer_actual += result
-                else:
-                    land.bag_pointer_actual = declared_bag
+
+                # probability_how_much_we_get = 10 * (1 + 0.03) ** pollinator.bag_pointer_actual / 100
+                # randy_random = uniform(0, 1)
+                # if randy_random >0 and randy_random <0.7:
+                #     result +=10
+                # elif randy_random>0.7 and randy_random <0.8 and actual_bag <=80:
+                #     result += 20
+                # elif randy_random>0.8 and randy_random <0.85 and actual_bag <=70:
+                #     result += 30
+                # else:
+                #     result += 10
+                # if actual_bag + result <= declared_bag:
+                #     land.bag_pointer_actual += result
+                # else:
+                #     land.bag_pointer_actual = declared_bag
+
         elif declared_bag < actual_bag:
             land.bag_pointer_actual = declared_bag
         if actual_bag > 0:

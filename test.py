@@ -8,6 +8,9 @@ import math
 #
 import numpy as np
 good = [[[1]], [[0.2]], [[0.2]]]
-bad = [[[1]], [[0.6]], [[0.6]]]
 
-print(np.array(good).reshape((10,3,1,1)))
+
+print([100,0,0,0] in [0,0,100,0])
+list1 = [100,0,0,0]
+list2  = [0,0,100,0]
+print(all(elem in list1  for elem in list2))

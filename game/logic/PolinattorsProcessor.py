@@ -17,11 +17,11 @@ class PolinattorsProcessor:
             for _ in range(GlobalParamsAi.NUMBER_OF_RANDOM_POLLINATORS)])
         for polinattors in self.all_polinattors:
             self.get_pollinator(polinattors).is_pollinator = True
-            self.get_pollinator(polinattors).bag_pointer_declared = 100
-            self.get_pollinator(polinattors).bag_pointer_actual = 100
+            self.get_pollinator(polinattors).bag_pointer_declared = 10
+            self.get_pollinator(polinattors).bag_pointer_actual = 10
             self.grid.all_cells[polinattors].is_pollinator = True
-            self.grid.all_cells[polinattors].bag_pointer_declared = 100
-            self.grid.all_cells[polinattors].bag_pointer_actual = 100
+            self.grid.all_cells[polinattors].bag_pointer_declared = 10
+            self.grid.all_cells[polinattors].bag_pointer_actual = 10
 
 
     def set_active_pollinator(self, land):
@@ -91,17 +91,16 @@ class PolinattorsProcessor:
     @staticmethod
     def sample_pollination(x,mode=0):
 
-        if mode ==0:
-            if x ==100:
-                return True
-            else:
-                return False
-            # probablity = 0.7627864 + (-1.579016e-7 - 0.7627864)/(1 + (x/84.04566)**13.87343)
-            # if probablity <0:
-            #     probablity=0
-            # randy_random = random.uniform(0, 1)
-            # return randy_random < probablity
 
+        if x ==70:
+            return True
         else:
-            if x >=30:
-                return True
+            return False
+            # probablity = 0.7627864 + (-1.579016e-7 - 0.7627864)/(1 + (x/84.04566)**13.87343)
+        # probablity =  244098.4 + (0.04389168 - 244098.4)/(1 + (x/4970.495)**3.182428)
+        # if probablity <0:
+        #     probablity=0
+        # randy_random = random.uniform(0, 1)
+        # return randy_random < probablity
+
+
