@@ -15,14 +15,14 @@ class Critic(nn.Module):
         #act_dim = self.dim_action * n_agent
         #ToDo Zastanow sie co powinien krytyk dostawac czy per land czy nie.
         act_dim = 1
-
-        self.FC1 = nn.Linear(243+9, 512)
+        print(f"critic dims {dim_observation*12+dim_observation}")
+        self.FC1 = nn.Linear(4+dim_observation, 1024)
         #self.norm1 = nn.BatchNorm1d(dim_observation)
-        self.FC2 = nn.Linear(512, 512)
+        self.FC2 = nn.Linear(1024, 2048)
         #self.norm2 = nn.BatchNorm1d(act_dim)
-        self.FC3 = nn.Linear(512, 512)
+        self.FC3 = nn.Linear(2048, 1024)
         #self.norm3 = nn.BatchNorm1d(512)
-        self.FC4 = nn.Linear(512, 1)
+        self.FC4 = nn.Linear(1024, 1)
 
     # obs: batch_size * obs_dim
     def forward(self, obs, acts):
@@ -52,11 +52,11 @@ class Critic(nn.Module):
 class Actor(nn.Module):
     def __init__(self, dim_observation, dim_action):
         super(Actor, self).__init__()
-
-        self.FC1 = nn.Linear(243, 512)
+        print(f"agent dims {dim_observation*18}")
+        self.FC1 = nn.Linear(4, 512)
         self.FC2 = nn.Linear(512, 512)
         self.FC3 = nn.Linear(512, 512)
-        self.FC4 = nn.Linear(512, 9)
+        self.FC4 = nn.Linear(512, dim_observation)
 
     # action output between -2 and 2
     def forward(self, obs):

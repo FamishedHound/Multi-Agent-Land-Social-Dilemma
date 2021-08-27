@@ -119,12 +119,12 @@ class gymDriver(gym.Env):
         for agent in self.agent_processor.all_agents:
             single_agent_obs = []
 
-            for land in agent.land_cells_owned:
-                empty_obs_position = np.zeros((board_size, board_size))
-                empty_obs_position[land.x, land.y] = 1
+            # for land in agent.land_cells_owned:
+            #     empty_obs_position = np.zeros((board_size, board_size))
+            #     empty_obs_position[land.x, land.y] = 1
 
 
-                single_agent_obs.append( np.array([empty_obs_position,empty_obs_declared, empty_obs_actual]))
+            single_agent_obs.append( np.array([empty_obs_declared]))#ToDo Deleting actual bag for debugging purposes
             land_per_agent_obs.append(single_agent_obs)
         #land_per_agent_obs.append(np.array([empty_obs_declared]))
         return land_per_agent_obs
@@ -153,9 +153,9 @@ class gymDriver(gym.Env):
         self.economy_manager.deduce_land_fee()
 
         done = False
-        # if self.polinattor_processor.check_for_failed_pollinators_during_exploration():
-        #     self.reset()
-        #     done = True
+        if self.polinattor_processor.check_for_failed_pollinators_during_exploration():
+            self.reset()
+            done = True
 
         # if randy_random==0:
         #
@@ -180,13 +180,12 @@ class gymDriver(gym.Env):
         #     reward = [[0]]
         self.render()
         reward = self._get_reward()
-        # if done:
-        #     reward = []
-        #     for agent_lands in lands_picked:
-        #         reward_agent_temp = []
-        #         for agent_land in agent_lands:
-        #                 reward_agent_temp.append(-1)
-        #         reward.append(reward_agent_temp)
+        if done:
+            reward = []
+            for agent_lands in lands_picked:
+                reward_agent_temp = []
+
+                reward.append(-10)
         state_of_game = [a.bag_pointer_actual for b in self.agent_processor.all_agents for i,a in enumerate(b.land_cells_owned) ]
         print(f"state of the game {state_of_game}")
 

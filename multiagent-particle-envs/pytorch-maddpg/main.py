@@ -12,7 +12,7 @@ from params import scale_reward
 def make_random_action(all_agents):
     action = []
     for agent in all_agents:
-        agent_actions = [th.tensor(random.choice([0,random.uniform(0,102)])/100) for _ in range(len(agent.land_cells_owned))]
+        agent_actions = [th.tensor(random.choice([random.uniform(0,102)])/100) for _ in range(len(agent.land_cells_owned))]
 
         action.append(agent_actions)
     return action
@@ -35,7 +35,7 @@ world.seed(1234)
 n_states = 213
 n_actions = 1
 capacity = 1000000
-batch_size = 64
+batch_size = 32
 n_episode = 20000
 max_steps = 100000
 episodes_before_train = 10
@@ -48,14 +48,16 @@ dims = np.array(obs)
 n_agents = world.n_agents
 buffer_action = None
 buffer_counter = 0
-maddpg = MADDPG(world.n_agents, 12, n_actions, batch_size, capacity,
-                episodes_before_train)
 
+obs = world.reset()
+worlds_all_agents = world.agent_processor.all_agents
+maddpg = MADDPG(world.n_agents, 12, n_actions, batch_size, capacity,
+                episodes_before_train,worlds_all_agents)
 FloatTensor = th.cuda.FloatTensor if maddpg.use_cuda else th.FloatTensor
+
 for i_episode in range(n_episode):
 
-    obs = world.reset()
-    worlds_all_agents = world.agent_processor.all_agents
+
     # obs = np.stack(obs)
     # if isinstance(obs, np.ndarray):
     #     obs = th.from_numpy(obs).float()
@@ -72,7 +74,8 @@ for i_episode in range(n_episode):
 
         if epsilon > randy_random:
             action = maddpg.select_action(obs, worlds_all_agents)
-            print(f" NEURAL ACTION  {[round(x.item(),2) for x in action[0]]}")
+            print(f" NEURAL ACTION agent 0  {[round(x.item(),2) for x in action[0]]}")
+            print(f" NEURAL ACTION agent 1  {[round(x.item(), 2) for x in action[1]]}")
             action = make_random_action(worlds_all_agents)
             # if buffer_counter % 2 ==0:
             #     buffer_counter=0
@@ -86,7 +89,8 @@ for i_episode in range(n_episode):
         else:
             # maddpg.batch_size= 32
             action = maddpg.select_action(obs, worlds_all_agents)
-            print(f" NEURAL ACTION  {[round(x.item(),2) for x in action[0]]}")
+            print(f" NEURAL ACTION agent 0  {[round(x.item(), 2) for x in action[0]]}")
+            print(f" NEURAL ACTION agent 1  {[round(x.item(), 2) for x in action[1]]}")
 
         # randy_random_2 = random.randint(0,1)
         # if randy_random_2 ==0:
