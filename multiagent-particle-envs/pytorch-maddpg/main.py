@@ -34,10 +34,10 @@ world.seed(1234)
 
 n_states = 213
 n_actions = 1
-capacity = 1000000
-batch_size = 32
+capacity = 5000
+batch_size = 16
 n_episode = 20000
-max_steps = 100000
+max_steps = 100000000
 episodes_before_train = 10
 epsilon = 1
 win = None
@@ -76,6 +76,8 @@ for i_episode in range(n_episode):
             action = maddpg.select_action(obs, worlds_all_agents)
             print(f" NEURAL ACTION agent 0  {[round(x.item(),2) for x in action[0]]}")
             print(f" NEURAL ACTION agent 1  {[round(x.item(), 2) for x in action[1]]}")
+            print(f" NEURAL ACTION agent 2  {[round(x.item(), 2) for x in action[2]]}")
+            print(f" NEURAL ACTION agent 3  {[round(x.item(), 2) for x in action[3]]}")
             action = make_random_action(worlds_all_agents)
             # if buffer_counter % 2 ==0:
             #     buffer_counter=0
@@ -91,7 +93,8 @@ for i_episode in range(n_episode):
             action = maddpg.select_action(obs, worlds_all_agents)
             print(f" NEURAL ACTION agent 0  {[round(x.item(), 2) for x in action[0]]}")
             print(f" NEURAL ACTION agent 1  {[round(x.item(), 2) for x in action[1]]}")
-
+            print(f" NEURAL ACTION agent 2  {[round(x.item(), 2) for x in action[2]]}")
+            print(f" NEURAL ACTION agent 3  {[round(x.item(), 2) for x in action[3]]}")
         # randy_random_2 = random.randint(0,1)
         # if randy_random_2 ==0:
         #     action = [[th.tensor(0.2)]]
@@ -99,7 +102,8 @@ for i_episode in range(n_episode):
         #     action = [[th.tensor(0.6)]]
         # choice = random.uniform(0, 1)#random.choice([0.1, 0.2,0.3,0.4,0.5,0.6])
         # action = [[th.tensor(choice).float()]]
-        print(f" action for the game{action}")
+        agents_actions = [f'''agent {i} made actions {a} \n ''' for i,a in enumerate(action)]
+        print(f" action for the game {agents_actions}")
         # action = th.from_numpy(action_np)
         # obs_, reward, done, _ = world.step(action, randy_random_2)
         obs_, reward, done, _ = world.step(action)
@@ -127,10 +131,10 @@ for i_episode in range(n_episode):
             # elif epsilon <  0.6 and epsilon > 0.3:
             #     epsilon -= 1e-4
             # el
-            if  epsilon > 0.25:
+            if  epsilon > 0.3:
                 epsilon -= 1e-3
             else:
-                epsilon = 0.25
+                epsilon = 0.3
         print(f"actual epsilon {epsilon}")
     maddpg.episode_done += 1
     # print('Episode: %d, reward = %f' % (i_episode, total_reward))

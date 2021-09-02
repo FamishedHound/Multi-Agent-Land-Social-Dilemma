@@ -53,13 +53,13 @@ class MADDPG:
         self.use_cuda = th.cuda.is_available()
         self.episodes_before_train = episodes_before_train
         loss_new = nn.BCEWithLogitsLoss()
-        self.GAMMA = 0.99
+        self.GAMMA = 0.90
         self.tau = 0.99
         self.lst1 = []
         self.lst2 = []
         self.var = [1.0 for _ in range(n_agents)]
         self.critic_optimizer = [Adam(x.parameters(),
-                                     lr=1e-4) for x in self.critics]
+                                     lr=1e-3) for x in self.critics]
         self.actor_optimizer = [Adam(x.parameters(),
                                      lr=1e-4) for x in self.actors]
         self.loss_list = []
@@ -108,10 +108,10 @@ class MADDPG:
             # state_batch = th.stack(batch.states).type(FloatTensor)
             # action_batch = batch.actions
             # reward_batch = th.stack(batch.rewards).type(FloatTensor)
-            S = np.stack([x[agent_index] for x in batch.states])
+            S = np.stack([x[agent_index] for x in batch.states]).squeeze(1)
             # S = S.reshape(-1, *S.shape[2:])
 
-            S_prime = np.stack([x[agent_index] for x in batch.next_states])
+            S_prime = np.stack([x[agent_index] for x in batch.next_states]).squeeze(1)
 
             # S_prime = S_prime.reshape(-1, *S_prime.shape[2:])
             action = np.stack([x[agent_index] for x in batch.actions])
@@ -329,7 +329,7 @@ class MADDPG:
             #
             #     plt.show()
 
-        update = 60
+        update = 100
         if epsilon <= 0.2:
             pass
             # plt.plot(self.loss_list)

@@ -124,7 +124,7 @@ class gymDriver(gym.Env):
             #     empty_obs_position[land.x, land.y] = 1
 
 
-            single_agent_obs.append( np.array([empty_obs_declared]))#ToDo Deleting actual bag for debugging purposes
+            single_agent_obs.append( np.array([empty_obs_declared,empty_obs_actual]))#ToDo Deleting actual bag for debugging purposes
             land_per_agent_obs.append(single_agent_obs)
         #land_per_agent_obs.append(np.array([empty_obs_declared]))
         return land_per_agent_obs
@@ -182,7 +182,7 @@ class gymDriver(gym.Env):
         reward = self._get_reward()
         if done:
             reward = []
-            for agent_lands in lands_picked:
+            for agent in self.agent_processor.all_agents:
                 reward_agent_temp = []
 
                 reward.append(-10)

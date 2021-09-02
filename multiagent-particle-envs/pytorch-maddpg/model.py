@@ -16,7 +16,7 @@ class Critic(nn.Module):
         #ToDo Zastanow sie co powinien krytyk dostawac czy per land czy nie.
         act_dim = 1
         print(f"critic dims {dim_observation*12+dim_observation}")
-        self.FC1 = nn.Linear(4+dim_observation, 1024)
+        self.FC1 = nn.Linear(32+dim_observation, 1024)
         #self.norm1 = nn.BatchNorm1d(dim_observation)
         self.FC2 = nn.Linear(1024, 2048)
         #self.norm2 = nn.BatchNorm1d(act_dim)
@@ -53,7 +53,7 @@ class Actor(nn.Module):
     def __init__(self, dim_observation, dim_action):
         super(Actor, self).__init__()
         print(f"agent dims {dim_observation*18}")
-        self.FC1 = nn.Linear(4, 512)
+        self.FC1 = nn.Linear(32, 512)
         self.FC2 = nn.Linear(512, 512)
         self.FC3 = nn.Linear(512, 512)
         self.FC4 = nn.Linear(512, dim_observation)
