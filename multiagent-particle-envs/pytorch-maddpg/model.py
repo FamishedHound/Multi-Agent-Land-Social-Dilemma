@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 
 class Critic(nn.Module):
-    def __init__(self, n_agent, dim_observation, dim_action):
+    def __init__(self, n_agent, dim_observation, batch_size):
         super(Critic, self).__init__()
         self.n_agent = n_agent
         # self.dim_observation = dim_observation
@@ -30,7 +30,8 @@ class Critic(nn.Module):
         # acts = self.norm2(acts)
 
         obs = th.flatten(obs.float())
-        acts = th.flatten(acts.float())
+        acts = th.flatten(acts).float()
+
         #combined = th.cat([obs, acts], 0)
         combined = th.cat([obs, acts], 0)
         result = F.relu(self.FC1(combined))

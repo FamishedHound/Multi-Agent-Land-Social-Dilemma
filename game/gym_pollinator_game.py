@@ -115,19 +115,21 @@ class gymDriver(gym.Env):
     def _create_observation(self):
         board_size = int(GlobalParamsGame.GlobalParamsGame.WINDOW_HEIGHT / GlobalParamsGame.GlobalParamsGame.BLOCKSIZE)
         land_per_agent_obs = []
-        empty_obs_actual, empty_obs_declared = self.get_global_state_without_position(board_size)
+        empty_obs_declared, empty_obs_actual = self.get_global_state_without_position(board_size)
         for agent in self.agent_processor.all_agents:
             single_agent_obs = []
+            empty_obs_local_declared = np.zeros((board_size, board_size))
+            empty_obs_local_actual = np.zeros((board_size, board_size))
+            for land in agent.land_cells_owned:
+                empty_obs_local_declared[land.x, land.y] = land.bag_pointer_declared / 100
+                empty_obs_local_actual[land.x, land.y] = land.bag_pointer_actual / 100
 
-            # for land in agent.land_cells_owned:
-            #     empty_obs_position = np.zeros((board_size, board_size))
-            #     empty_obs_position[land.x, land.y] = 1
 
-
-            single_agent_obs.append( np.array([empty_obs_declared,empty_obs_actual]))#ToDo Deleting actual bag for debugging purposes
+            single_agent_obs.append( np.array([empty_obs_local_declared,empty_obs_local_actual]))#ToDo Deleting actual bag for debugging purposes
             land_per_agent_obs.append(single_agent_obs)
         #land_per_agent_obs.append(np.array([empty_obs_declared]))
-        return land_per_agent_obs
+        global_obs = np.array([empty_obs_declared,empty_obs_actual])
+        return land_per_agent_obs,global_obs
 
     def get_global_state_without_position(self, board_size):
         empty_obs_declared = np.zeros((board_size, board_size))
@@ -136,7 +138,7 @@ class gymDriver(gym.Env):
             for land in agent.land_cells_owned:
                 empty_obs_declared[land.x, land.y] = land.bag_pointer_declared / 100
                 empty_obs_actual[land.x, land.y] = land.bag_pointer_actual / 100
-        return empty_obs_actual, empty_obs_declared
+        return empty_obs_declared,empty_obs_actual
 
     def render(self, mode='human'):
         self.grid.drawGrid()
@@ -190,8 +192,7 @@ class gymDriver(gym.Env):
         print(f"state of the game {state_of_game}")
 
         print(f"rewards per agent {reward}")
-        if all(elem in state_of_game  for elem in [0,0,100,0]):
-            print()
+
         return self._create_observation(), reward, done, None
 
 

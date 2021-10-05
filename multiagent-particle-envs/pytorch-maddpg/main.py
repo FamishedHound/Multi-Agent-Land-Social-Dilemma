@@ -12,7 +12,8 @@ from params import scale_reward
 def make_random_action(all_agents):
     action = []
     for agent in all_agents:
-        agent_actions = [th.tensor(random.choice([random.uniform(0,102)])/100) for _ in range(len(agent.land_cells_owned))]
+        agent_actions = [th.tensor(random.choice([random.uniform(0, 102)]) / 100) for _ in
+                         range(len(agent.land_cells_owned))]
 
         action.append(agent_actions)
     return action
@@ -48,15 +49,15 @@ dims = np.array(obs)
 n_agents = world.n_agents
 buffer_action = None
 buffer_counter = 0
-
-obs = world.reset()
+cum_reward = []
+import matplotlib.pyplot as plt
+(obs,global_state) = world.reset()
 worlds_all_agents = world.agent_processor.all_agents
 maddpg = MADDPG(world.n_agents, 12, n_actions, batch_size, capacity,
-                episodes_before_train,worlds_all_agents)
+                episodes_before_train, worlds_all_agents)
 FloatTensor = th.cuda.FloatTensor if maddpg.use_cuda else th.FloatTensor
 
 for i_episode in range(n_episode):
-
 
     # obs = np.stack(obs)
     # if isinstance(obs, np.ndarray):
@@ -74,7 +75,7 @@ for i_episode in range(n_episode):
 
         if epsilon > randy_random:
             action = maddpg.select_action(obs, worlds_all_agents)
-            print(f" NEURAL ACTION agent 0  {[round(x.item(),2) for x in action[0]]}")
+            print(f" NEURAL ACTION agent 0  {[round(x.item(), 2) for x in action[0]]}")
             print(f" NEURAL ACTION agent 1  {[round(x.item(), 2) for x in action[1]]}")
             print(f" NEURAL ACTION agent 2  {[round(x.item(), 2) for x in action[2]]}")
             print(f" NEURAL ACTION agent 3  {[round(x.item(), 2) for x in action[3]]}")
@@ -102,11 +103,11 @@ for i_episode in range(n_episode):
         #     action = [[th.tensor(0.6)]]
         # choice = random.uniform(0, 1)#random.choice([0.1, 0.2,0.3,0.4,0.5,0.6])
         # action = [[th.tensor(choice).float()]]
-        agents_actions = [f'''agent {i} made actions {a} \n ''' for i,a in enumerate(action)]
+        agents_actions = [f'''agent {i} made actions {a} \n ''' for i, a in enumerate(action)]
         print(f" action for the game {agents_actions}")
         # action = th.from_numpy(action_np)
         # obs_, reward, done, _ = world.step(action, randy_random_2)
-        obs_, reward, done, _ = world.step(action)
+        (obs_, global_state_), reward, done, _ = world.step(action)
 
         # reward = th.FloatTensor(reward).type(FloatTensor)
         # obs_ = np.stack(obs_)
@@ -116,13 +117,15 @@ for i_episode in range(n_episode):
         # else:
         #     next_obs = None
         next_obs = obs_
+        next_global_state = global_state_
         # total_reward += reward.sum()
         # rr += reward.cpu()
         # obs_ = np.concatenate([np.expand_dims(obs[2], 0), obs_], 0)
 
-        maddpg.memory.push(obs, action, obs_, reward)
+        maddpg.memory.push(obs, action, obs_, reward,global_state,global_state_)
         obs = next_obs
-
+        global_state = next_global_state
+        cum_reward.append(sum(reward))
         c_loss, a_loss = maddpg.update_policy(worlds_all_agents, epsilon)
         maddpg.episode_done += 1
         if maddpg.episode_done >= batch_size:
@@ -131,7 +134,10 @@ for i_episode in range(n_episode):
             # elif epsilon <  0.6 and epsilon > 0.3:
             #     epsilon -= 1e-4
             # el
-            if  epsilon > 0.3:
+            if round(epsilon*1000) %211==0 and epsilon==0.3:
+                plt.plot(cum_reward)
+                plt.show()
+            if epsilon > 0.3:
                 epsilon -= 1e-3
             else:
                 epsilon = 0.3

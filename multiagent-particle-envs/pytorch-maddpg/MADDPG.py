@@ -39,7 +39,7 @@ class MADDPG:
                  capacity, episodes_before_train,worlds_all_agents):
         self.actors = [Actor(len(a.land_cells_owned), dim_act) for a in worlds_all_agents]
         self.critics = [Critic(len(a.land_cells_owned), len(a.land_cells_owned),
-                               dim_act) for a in worlds_all_agents]
+                               batch_size) for a in worlds_all_agents]
         # self.actors = [a.apply(weights_init_uniform) for a in self.actors]
         # self.critics = [c.apply(weights_init_uniform) for c in self.critics]
         self.actors_target = deepcopy(self.actors)
@@ -53,13 +53,13 @@ class MADDPG:
         self.use_cuda = th.cuda.is_available()
         self.episodes_before_train = episodes_before_train
         loss_new = nn.BCEWithLogitsLoss()
-        self.GAMMA = 0.90
-        self.tau = 0.99
+        self.GAMMA = 0.91
+        self.tau = 0.95
         self.lst1 = []
         self.lst2 = []
         self.var = [1.0 for _ in range(n_agents)]
         self.critic_optimizer = [Adam(x.parameters(),
-                                     lr=1e-3) for x in self.critics]
+                                     lr=1e-4) for x in self.critics]
         self.actor_optimizer = [Adam(x.parameters(),
                                      lr=1e-4) for x in self.actors]
         self.loss_list = []
@@ -112,7 +112,8 @@ class MADDPG:
             # S = S.reshape(-1, *S.shape[2:])
 
             S_prime = np.stack([x[agent_index] for x in batch.next_states]).squeeze(1)
-
+            global_states = np.asarray(batch.global_state)
+            global_states_prime = np.asarray(batch.next_global_state)
             # S_prime = S_prime.reshape(-1, *S_prime.shape[2:])
             action = np.stack([x[agent_index] for x in batch.actions])
 
@@ -122,7 +123,7 @@ class MADDPG:
             # reward_batch = reward_batch[:,agent_index]
             # reward_batch = reward_batch.reshape(-1, *reward_batch.shape[2:])
             reward_batch = th.from_numpy(reward_batch).cuda()
-            S_with_action = zip(th.from_numpy(S).cuda(), th.from_numpy(action).cuda())
+            S_with_action = zip(th.from_numpy(global_states).cuda(), th.from_numpy(action).cuda())
             # print(f" reward { reward_batch}")
             # print(f"S prime {S_prime}")
 
@@ -139,11 +140,10 @@ class MADDPG:
             # whole_action = action_batch
             self.critic_optimizer[agent_index].zero_grad()
 
-            # current_Q = th.empty((self.batch_size, S.shape[1]))
             current_Q = th.empty((self.batch_size))
-            for i, data in enumerate(S_with_action):
-                batch_states, batch_actions = data
-                current_Q[i]=self.critics[agent_index](batch_states.unsqueeze(0), batch_actions.unsqueeze(0))
+            for i,d in enumerate(zip(global_states,action)):
+                state, actions = d
+                current_Q[i] =self.critics[agent_index](th.from_numpy(state).cuda(), th.from_numpy(actions).cuda())
                 # for q, data in enumerate(zip(batch_states, batch_actions)):
                 #     land, action = data
                 #     current_Q[i, q] = self.critics[agent_index](land.float(), action)
@@ -179,7 +179,7 @@ class MADDPG:
             # S' => a'
 
             # print(f"{non_final_next_actions} output of future actions")
-            S_prime_action_prime = zip(th.from_numpy(S_prime), non_final_next_actions)
+            S_prime_action_prime = zip(th.from_numpy(global_states_prime), non_final_next_actions)
             # ToDo Turn it on for batching or different local obs
             # non_final_next_actions = th.stack(non_final_next_actions)
             # ToDo Turn it on for batching or different local obs
@@ -204,13 +204,12 @@ class MADDPG:
             #     non_final_next_states,
             #     non_final_next_actions
             # ).squeeze()
-            # target_Q = th.empty((self.batch_size, S.shape[1])).cuda()
-            target_Q = th.empty((self.batch_size))
-            for i, data in enumerate(S_prime_action_prime):
-                batch_land, batch_action = data
+            target_Q = th.empty((self.batch_size)).cuda()
+            for i,d in enumerate(zip(global_states_prime,non_final_next_actions)):
+                state,actions = d
                 target_Q[i] = self.critics_target[agent_index](
-                        batch_land.float().cuda(),
-                        batch_action.cuda())
+                        th.from_numpy(state).cuda(),
+                        actions.cuda())
                 # for q, data in enumerate(zip(batch_land, batch_action)):
                 #     land, action = data
                 #     target_Q[i, q] = self.critics_target[agent_index](
@@ -228,9 +227,9 @@ class MADDPG:
             #         reward_batch[:, agent_index].unsqueeze(1) * scale_reward)
             # current_Q = np.array(current_Q)
             # target_Q = np.array(target_Q)
-            target_Q = target_Q.view(self.batch_size, -1).cuda()
-            reward_batch = reward_batch.view(self.batch_size, -1).cuda()
-            current_Q = current_Q.view(self.batch_size, -1).cuda()
+            # target_Q = target_Q.view(self.batch_size, -1).cuda()
+            # reward_batch = reward_batch.view(self.batch_size, -1).cuda()
+            # current_Q = current_Q.view(self.batch_size, -1).cuda()
             target_Q = (target_Q * self.GAMMA) + (
                 reward_batch.cuda())
             # current_Q = np.expand_dims(current_Q, 0)
@@ -282,7 +281,7 @@ class MADDPG:
                 # for q, land in enumerate(land_batch):
                 #     action_i[i, q] = self.actors[agent_index](
                 #         th.from_numpy(land).unsqueeze(0).float().cuda())
-            state_i_with_action_i = zip(state_i, action_i)
+            state_i_with_action_i = zip(global_states.copy(), action_i)
             # actor_loss = [-self.critics[agent_index](th.from_numpy(whole_state).float().cuda(), whole_action.cuda()) for
             #               whole_state, whole_action in state_i_with_action_i]
             actor_loss = th.empty((self.batch_size)).cuda()
@@ -329,7 +328,7 @@ class MADDPG:
             #
             #     plt.show()
 
-        update = 100
+        update = 50
         if epsilon <= 0.2:
             pass
             # plt.plot(self.loss_list)
@@ -376,9 +375,10 @@ class MADDPG:
             agent_actions = []
             decisions = self.actors[agent_index](
                     th.from_numpy(np.array(sb)).unsqueeze(0).float().cuda()).squeeze().data.cpu()
+
             tensor_actions = [th.tensor(x) for x in decisions.tolist()]
             actions.append(tensor_actions)
-            print()
+
             # for i, land in enumerate(sb):
             #     # land_obs = th.rand((3,2,2))
             #     fluid_state = np.asarray(land).copy()
