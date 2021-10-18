@@ -1,4 +1,4 @@
-from random import uniform, random, choice,randint
+from random import uniform, random, choice, randint
 
 import gym
 import sys
@@ -33,8 +33,8 @@ class gymDriver(gym.Env):
         self.environmental_manager.process_declared_lands()
         self.economy_manager = EconomyManager(self.agent_processor.all_agents, self.polinattor_processor)
         self.counter = 0
-    def reset(self):
 
+    def reset(self):
 
         self.polinattor_processor = PolinattorsProcessor(grid=self.grid)
 
@@ -63,53 +63,36 @@ class gymDriver(gym.Env):
     #     return np.array(agents_rewards)
     def get_global_pollinators_reward(self):
         pollinators_reward = 0
-        for i, agent in enumerate(self.agent_processor.all_agents):
 
 
-            for land in agent.land_cells_owned:
-                if land.bag_pointer_actual ==100:
-                    pollinators_reward+=0.1
+        for land in self.grid.all_cells.values():
+
+                pollinators_reward += (land.bag_pointer_actual/100)/len(self.grid.all_cells)
         print(f"Global pollinators reward {pollinators_reward}")
         return pollinators_reward
+
     def _get_reward(self):
         agents_rewards = []
-        global_pollinators_reward =  self.get_global_pollinators_reward()
+        global_pollinators_reward = self.get_global_pollinators_reward()
 
         for i, agent in enumerate(self.agent_processor.all_agents):
-            agent_land_rewards = []
+
             cumulative_reward = 0
-            x = [x.bag_pointer_actual for x in agent.land_cells_owned]
-            # print("state being {}".format(x))
-            # if x==[90,90,90,90]:
-            #     reward = 1
-            # elif x ==[100,100,100,100]:
-            #     reward = - 1
-            # else:
-            #     reward = 0
-            for i,land in enumerate(agent.land_cells_owned):
 
-                single_reward = land.last_income/100
-                if single_reward==0:
-                    single_reward=-0.5
-                cumulative_reward += single_reward
-                # if reward ==0 :
-                #     reward=0.2
-                # if land.was_pollinated:
-                #     reward=1
-                # else:
-                #     reward=0
-                # if land.bag_pointer_declared == 60 :
-                #     reward = 1
-                # elif land.bag_pointer_declared > 60:
-                #     reward = 60/land.bag_pointer_declared
-                # else:
-                #     reward = land.bag_pointer_declared/60
-                #
-            #agent_land_rewards.append(cumulative_reward)
-            #land_rewards = [cumulative_reward for _ in range (len(agent.land_cells_owned))]
+            for i, land in enumerate(agent.land_cells_owned):
 
+                single_reward = land.last_income / 100
 
-            agents_rewards.append(cumulative_reward/len(agent.land_cells_owned))
+                cumulative_reward += single_reward-GlobalParamsGame.GlobalEconomyParams.LAND_UPCOST/100
+
+            money_reward = cumulative_reward / len(agent.land_cells_owned)
+            final_reward = agent.alpha * money_reward + (1 - agent.alpha) * global_pollinators_reward
+            print(
+                f"AGENT:{agent.id} his alpha is {agent.alpha} money :{money_reward}"
+                f" env :{round(global_pollinators_reward,2)}"
+                f" final_reward : {final_reward} ")
+
+            agents_rewards.append(final_reward)
         return agents_rewards
 
     def _create_observation(self):
@@ -124,12 +107,12 @@ class gymDriver(gym.Env):
                 empty_obs_local_declared[land.x, land.y] = land.bag_pointer_declared / 100
                 empty_obs_local_actual[land.x, land.y] = land.bag_pointer_actual / 100
 
-
-            single_agent_obs.append( np.array([empty_obs_local_declared,empty_obs_local_actual]))#ToDo Deleting actual bag for debugging purposes
+            single_agent_obs.append(
+                np.array([empty_obs_local_actual]))  # ToDo Deleting actual bag for debugging purposes
             land_per_agent_obs.append(single_agent_obs)
-        #land_per_agent_obs.append(np.array([empty_obs_declared]))
-        global_obs = np.array([empty_obs_declared,empty_obs_actual])
-        return land_per_agent_obs,global_obs
+        # land_per_agent_obs.append(np.array([empty_obs_declared]))
+        global_obs = np.array([empty_obs_actual])
+        return land_per_agent_obs, global_obs
 
     def get_global_state_without_position(self, board_size):
         empty_obs_declared = np.zeros((board_size, board_size))
@@ -138,16 +121,14 @@ class gymDriver(gym.Env):
             for land in agent.land_cells_owned:
                 empty_obs_declared[land.x, land.y] = land.bag_pointer_declared / 100
                 empty_obs_actual[land.x, land.y] = land.bag_pointer_actual / 100
-        return empty_obs_declared,empty_obs_actual
+        return empty_obs_declared, empty_obs_actual
 
     def render(self, mode='human'):
         self.grid.drawGrid()
         process_pygame_events()
         pygame.display.update()
 
-    def step(self, action=None,randy_random=None):
-
-
+    def step(self, action=None, randy_random=None):
 
         lands_picked = self.action_processor.all_agents_make_a_move(action)
         self.polinattor_processor.clear_pollinators()
@@ -174,21 +155,15 @@ class gymDriver(gym.Env):
         #             reward_agent_temp.append(0)
         #     reward.append(reward_agent_temp)
 
-
-
         # if np.array(self._create_observation())[0][0][1][0].item()==0.2:
         #     reward = [[1]]
         # else:
         #     reward = [[0]]
         self.render()
         reward = self._get_reward()
-        if done:
-            reward = []
-            for agent in self.agent_processor.all_agents:
-                reward_agent_temp = []
 
-                reward.append(-10)
-        state_of_game = [a.bag_pointer_actual for b in self.agent_processor.all_agents for i,a in enumerate(b.land_cells_owned) ]
+        state_of_game = [a.bag_pointer_actual for b in self.agent_processor.all_agents for i, a in
+                         enumerate(b.land_cells_owned)]
         print(f"state of the game {state_of_game}")
 
         print(f"rewards per agent {reward}")

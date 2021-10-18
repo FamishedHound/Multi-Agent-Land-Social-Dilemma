@@ -53,15 +53,15 @@ class MADDPG:
         self.use_cuda = th.cuda.is_available()
         self.episodes_before_train = episodes_before_train
         loss_new = nn.BCEWithLogitsLoss()
-        self.GAMMA = 0.91
+        self.GAMMA = 0.90
         self.tau = 0.95
         self.lst1 = []
         self.lst2 = []
         self.var = [1.0 for _ in range(n_agents)]
         self.critic_optimizer = [Adam(x.parameters(),
-                                     lr=1e-4) for x in self.critics]
+                                     lr=1e-3) for x in self.critics]
         self.actor_optimizer = [Adam(x.parameters(),
-                                     lr=1e-4) for x in self.actors]
+                                     lr=1e-3) for x in self.actors]
         self.loss_list = []
         self.loss_q = []
         self.lst3 = []
@@ -240,7 +240,7 @@ class MADDPG:
 
             loss_Q = nn.MSELoss()(current_Q.float().cuda(), target_Q.float().detach())
             # print(loss_Q.item())
-            self.loss_q.append(loss_Q)
+            #self.loss_q.append(loss_Q)
             loss_Q.backward()
             #print(f"lossQ {loss_Q}")
             self.critic_optimizer[agent_index].step()
@@ -328,7 +328,7 @@ class MADDPG:
             #
             #     plt.show()
 
-        update = 50
+        update = 100
         if epsilon <= 0.2:
             pass
             # plt.plot(self.loss_list)
@@ -337,8 +337,8 @@ class MADDPG:
             # plt.show()
         if self.steps_done % update == 0 and self.steps_done > 0:
             for i in range(self.n_agents):
-                soft_update(self.critics_target[i], self.critics[i], self.tau)
-                soft_update(self.actors_target[i], self.actors[i], self.tau)
+                hard_update(self.critics_target[i], self.critics[i])
+                hard_update(self.actors_target[i], self.actors[i])
         #print("end of ITERATION")
         return c_loss, a_loss
 

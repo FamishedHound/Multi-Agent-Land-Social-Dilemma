@@ -36,7 +36,7 @@ world.seed(1234)
 n_states = 213
 n_actions = 1
 capacity = 5000
-batch_size = 16
+batch_size = 32
 n_episode = 20000
 max_steps = 100000000
 episodes_before_train = 10
@@ -138,7 +138,7 @@ for i_episode in range(n_episode):
                 plt.plot(cum_reward)
                 plt.show()
             if epsilon > 0.3:
-                epsilon -= 1e-3
+                epsilon -= 1e-4
             else:
                 epsilon = 0.3
         print(f"actual epsilon {epsilon}")
