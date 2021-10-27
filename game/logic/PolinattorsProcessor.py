@@ -92,15 +92,15 @@ class PolinattorsProcessor:
     def sample_pollination(x,mode=0):
 
 
-        # if x ==70:
-        #     return True
-        # else:
-        #     return False
+        if x ==50:
+            return True
+        else:
+            return False
             # probablity = 0.7627864 + (-1.579016e-7 - 0.7627864)/(1 + (x/84.04566)**13.87343)
-        probablity =  1.52239 + (-0.001725851 - 1.52239)/(1 + (x/98.6658)**7.729825)
-        if probablity <0:
-             probablity=0
-        randy_random = random.uniform(0, 1)
-        return randy_random < probablity
+        # probablity =  1.52239 + (-0.001725851 - 1.52239)/(1 + (x/98.6658)**7.729825)
+        # if probablity <0:
+        #      probablity=0
+        # randy_random = random.uniform(0, 1)
+        # return randy_random < probablity
 
 

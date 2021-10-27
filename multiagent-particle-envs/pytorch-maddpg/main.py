@@ -5,6 +5,7 @@ from MADDPG import MADDPG
 import numpy as np
 import torch as th
 
+from ai.goverment_agent import meta_agent
 from game.gym_pollinator_game import gymDriver
 from params import scale_reward
 
@@ -28,7 +29,7 @@ n_coop = 2
 world = gymDriver()
 
 reward_record = []
-
+from ai import goverment_agent
 np.random.seed(1234)
 th.manual_seed(1234)
 world.seed(1234)
@@ -56,6 +57,24 @@ worlds_all_agents = world.agent_processor.all_agents
 maddpg = MADDPG(world.n_agents, 12, n_actions, batch_size, capacity,
                 episodes_before_train, worlds_all_agents)
 FloatTensor = th.cuda.FloatTensor if maddpg.use_cuda else th.FloatTensor
+
+
+def handle_exploration():
+    global epsilon
+    if maddpg.episode_done >= batch_size:
+        # if epsilon > 0.6 :
+        #     epsilon -= 1e-3
+        # elif epsilon <  0.6 and epsilon > 0.3:
+        #     epsilon -= 1e-4
+        # el
+        if round(epsilon * 1000) % 211 == 0 and epsilon == 0.3:
+            plt.plot(cum_reward)
+            plt.show()
+        if epsilon > 0.3:
+            epsilon -= 1e-3
+        else:
+            epsilon = 0.3
+
 
 for i_episode in range(n_episode):
 
@@ -103,11 +122,13 @@ for i_episode in range(n_episode):
         #     action = [[th.tensor(0.6)]]
         # choice = random.uniform(0, 1)#random.choice([0.1, 0.2,0.3,0.4,0.5,0.6])
         # action = [[th.tensor(choice).float()]]
+        meta = meta_agent(None, None)
+        incentive = meta.distribute_incetive()
         agents_actions = [f'''agent {i} made actions {a} \n ''' for i, a in enumerate(action)]
         print(f" action for the game {agents_actions}")
         # action = th.from_numpy(action_np)
         # obs_, reward, done, _ = world.step(action, randy_random_2)
-        (obs_, global_state_), reward, done, _ = world.step(action)
+        (obs_, global_state_), reward, done, _ = world.step(action,None,incentive)
 
         # reward = th.FloatTensor(reward).type(FloatTensor)
         # obs_ = np.stack(obs_)
@@ -128,19 +149,8 @@ for i_episode in range(n_episode):
         cum_reward.append(sum(reward))
         c_loss, a_loss = maddpg.update_policy(worlds_all_agents, epsilon)
         maddpg.episode_done += 1
-        if maddpg.episode_done >= batch_size:
-            # if epsilon > 0.6 :
-            #     epsilon -= 1e-3
-            # elif epsilon <  0.6 and epsilon > 0.3:
-            #     epsilon -= 1e-4
-            # el
-            if round(epsilon*1000) %211==0 and epsilon==0.3:
-                plt.plot(cum_reward)
-                plt.show()
-            if epsilon > 0.3:
-                epsilon -= 1e-4
-            else:
-                epsilon = 0.3
+
+        handle_exploration()
         print(f"actual epsilon {epsilon}")
     maddpg.episode_done += 1
     # print('Episode: %d, reward = %f' % (i_episode, total_reward))

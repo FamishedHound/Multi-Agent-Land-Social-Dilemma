@@ -2,6 +2,8 @@ import torch as th
 import torch.nn as nn
 import torch.nn.functional as F
 
+from game.GlobalParamsGame import GlobalParamsAi
+
 
 class Critic(nn.Module):
     def __init__(self, n_agent, dim_observation, batch_size):
@@ -68,3 +70,26 @@ class Actor(nn.Module):
         result = self.FC4(result)
         result = th.sigmoid(result)
         return result
+class MultiPurposemetaLearner(nn.Module):
+    #in
+    def __init__(self):
+        super().__init__()
+        self.number_of_agents = GlobalParamsAi.NUMBER_OF_AGENTS
+        self.FC1 = nn.Linear(16, 512)
+        self.FC2 = nn.Linear(512, 1028)
+        self.FC3 = nn.Linear(1028, self.number_of_agents)
+
+        self.FC4_ = nn.Linear(1028, 2056)
+
+
+    def forward(self,obs):
+        obs_visual = obs
+        obs = th.flatten(obs)
+        result = F.relu(self.FC1(obs))
+        result = F.relu(self.FC2(result))
+        result = F.relu(self.FC3(result))
+        result = F.softmax(result,dim=1)
+
+        #Possibly multiply
+        result = self.FC1(obs)
+        result = self.FC1(obs)

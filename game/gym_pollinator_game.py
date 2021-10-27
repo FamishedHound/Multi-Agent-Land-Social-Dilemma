@@ -40,27 +40,9 @@ class gymDriver(gym.Env):
 
         self.n_agents = len(self.agent_processor.all_agents)
 
-        return self._create_observation()
+        return self._create_observation([0,0,0,0])
 
-    # def _get_reward(self):
-    #     agents_rewards = []
-    #     for i, agent in enumerate(self.agent_processor.all_agents):
-    #         agent_land_rewards = []
-    #         reward = 0
-    #         for land in agent.land_cells_owned:
-    #             # reward = land.last_income/100
-    #             if land.bag_pointer_declared == 50:
-    #                 reward = -1
-    #             elif land.bag_pointer_declared == 100:
-    #                 reward =-1
-    #             elif land.bag_pointer_declared == 20 :
-    #
-    #                 reward = 1
-    #             else:
-    #                 reward =-1
-    #             agent_land_rewards.append(reward)
-    #         agents_rewards.append(agent_land_rewards)
-    #     return np.array(agents_rewards)
+
     def get_global_pollinators_reward(self):
         pollinators_reward = 0
 
@@ -71,11 +53,11 @@ class gymDriver(gym.Env):
         print(f"Global pollinators reward {pollinators_reward}")
         return pollinators_reward
 
-    def _get_reward(self):
+    def _get_reward(self,incentive):
         agents_rewards = []
         global_pollinators_reward = self.get_global_pollinators_reward()
 
-        for i, agent in enumerate(self.agent_processor.all_agents):
+        for j, agent in enumerate(self.agent_processor.all_agents):
 
             cumulative_reward = 0
 
@@ -86,20 +68,22 @@ class gymDriver(gym.Env):
                 cumulative_reward += single_reward-GlobalParamsGame.GlobalEconomyParams.LAND_UPCOST/100
 
             money_reward = cumulative_reward / len(agent.land_cells_owned)
-            final_reward = agent.alpha * money_reward + (1 - agent.alpha) * global_pollinators_reward
+            final_reward = agent.alpha * money_reward + (1 - agent.alpha ) * global_pollinators_reward  #incentive 0-1 you can divide by 2 everything
+            agent.money += incentive[j] * 1000
             print(
                 f"AGENT:{agent.id} his alpha is {agent.alpha} money :{money_reward}"
                 f" env :{round(global_pollinators_reward,2)}"
+                f"trust incentive : {incentive[j]}" 
                 f" final_reward : {final_reward} ")
 
             agents_rewards.append(final_reward)
         return agents_rewards
 
-    def _create_observation(self):
+    def _create_observation(self,incentive):
         board_size = int(GlobalParamsGame.GlobalParamsGame.WINDOW_HEIGHT / GlobalParamsGame.GlobalParamsGame.BLOCKSIZE)
         land_per_agent_obs = []
         empty_obs_declared, empty_obs_actual = self.get_global_state_without_position(board_size)
-        for agent in self.agent_processor.all_agents:
+        for j,agent in enumerate(self.agent_processor.all_agents):
             single_agent_obs = []
             empty_obs_local_declared = np.zeros((board_size, board_size))
             empty_obs_local_actual = np.zeros((board_size, board_size))
@@ -108,7 +92,7 @@ class gymDriver(gym.Env):
                 empty_obs_local_actual[land.x, land.y] = land.bag_pointer_actual / 100
 
             single_agent_obs.append(
-                np.array([empty_obs_local_actual]))  # ToDo Deleting actual bag for debugging purposes
+                np.array([empty_obs_local_actual])*incentive[j])  # ToDo Deleting actual bag for debugging purposes
             land_per_agent_obs.append(single_agent_obs)
         # land_per_agent_obs.append(np.array([empty_obs_declared]))
         global_obs = np.array([empty_obs_actual])
@@ -128,7 +112,7 @@ class gymDriver(gym.Env):
         process_pygame_events()
         pygame.display.update()
 
-    def step(self, action=None, randy_random=None):
+    def step(self, action=None, randy_random=None,incentive=None):
 
         lands_picked = self.action_processor.all_agents_make_a_move(action)
         self.polinattor_processor.clear_pollinators()
@@ -140,27 +124,9 @@ class gymDriver(gym.Env):
             self.reset()
             done = True
 
-        # if randy_random==0:
-        #
-        #     reward = [[1]]
-        # else:
-        #
-        # reward = []
-        # for agent_lands in lands_picked:
-        #     reward_agent_temp = []
-        #     for agent_land in agent_lands:
-        #         if agent_land==70:
-        #             reward_agent_temp.append(1)
-        #         else:
-        #             reward_agent_temp.append(0)
-        #     reward.append(reward_agent_temp)
 
-        # if np.array(self._create_observation())[0][0][1][0].item()==0.2:
-        #     reward = [[1]]
-        # else:
-        #     reward = [[0]]
         self.render()
-        reward = self._get_reward()
+        reward = self._get_reward(incentive)
 
         state_of_game = [a.bag_pointer_actual for b in self.agent_processor.all_agents for i, a in
                          enumerate(b.land_cells_owned)]
@@ -168,7 +134,7 @@ class gymDriver(gym.Env):
 
         print(f"rewards per agent {reward}")
 
-        return self._create_observation(), reward, done, None
+        return self._create_observation(incentive), reward, done, None
 
 
 def process_pygame_events():
