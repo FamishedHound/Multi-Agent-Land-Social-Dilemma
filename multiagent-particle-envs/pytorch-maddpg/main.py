@@ -70,10 +70,10 @@ def handle_exploration():
         if round(epsilon * 1000) % 211 == 0 and epsilon == 0.3:
             plt.plot(cum_reward)
             plt.show()
-        if epsilon > 0.3:
-            epsilon -= 1e-3
+        if epsilon > 0.4:
+            epsilon -= 1e-4
         else:
-            epsilon = 0.3
+            epsilon = 0.4
 
 
 for i_episode in range(n_episode):
@@ -91,7 +91,8 @@ for i_episode in range(n_episode):
 
         # obs = obs.type(FloatTensor)
         randy_random = random.uniform(0, 1)
-
+        meta = meta_agent(None, None, worlds_all_agents)
+        incentive = meta.distribute_incetive()
         if epsilon > randy_random:
             action = maddpg.select_action(obs, worlds_all_agents)
             print(f" NEURAL ACTION agent 0  {[round(x.item(), 2) for x in action[0]]}")
@@ -122,8 +123,7 @@ for i_episode in range(n_episode):
         #     action = [[th.tensor(0.6)]]
         # choice = random.uniform(0, 1)#random.choice([0.1, 0.2,0.3,0.4,0.5,0.6])
         # action = [[th.tensor(choice).float()]]
-        meta = meta_agent(None, None)
-        incentive = meta.distribute_incetive()
+
         agents_actions = [f'''agent {i} made actions {a} \n ''' for i, a in enumerate(action)]
         print(f" action for the game {agents_actions}")
         # action = th.from_numpy(action_np)

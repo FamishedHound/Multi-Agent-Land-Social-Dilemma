@@ -44,7 +44,7 @@ class RuleBasedAgent(Agent):
         self.pollinators_processor.buffer_lands.append(key_land_cell)
         for subland in sublands:
             subland_key = self.pollinators_processor.get_pollinator(subland)
-            subland_key.bag_pointer_declared = value
+            subland_key._declared = value
             self.pollinators_processor.buffer_lands.append(subland_key)
 
 

@@ -68,12 +68,12 @@ class gymDriver(gym.Env):
                 cumulative_reward += single_reward-GlobalParamsGame.GlobalEconomyParams.LAND_UPCOST/100
 
             money_reward = cumulative_reward / len(agent.land_cells_owned)
-            final_reward = agent.alpha * money_reward + (1 - agent.alpha ) * global_pollinators_reward  #incentive 0-1 you can divide by 2 everything
-            agent.money += incentive[j] * 1000
+            final_reward = agent.alpha * (money_reward) + (1 - agent.alpha ) * global_pollinators_reward + incentive[j]/2 #incentive 0-1 you can divide by 2 everything
+            #agent.money += incentive[j] * 1000
             print(
                 f"AGENT:{agent.id} his alpha is {agent.alpha} money :{money_reward}"
                 f" env :{round(global_pollinators_reward,2)}"
-                f"trust incentive : {incentive[j]}" 
+                f"trust incentive : {incentive[j]/4}" 
                 f" final_reward : {final_reward} ")
 
             agents_rewards.append(final_reward)
@@ -82,30 +82,36 @@ class gymDriver(gym.Env):
     def _create_observation(self,incentive):
         board_size = int(GlobalParamsGame.GlobalParamsGame.WINDOW_HEIGHT / GlobalParamsGame.GlobalParamsGame.BLOCKSIZE)
         land_per_agent_obs = []
-        empty_obs_declared, empty_obs_actual = self.get_global_state_without_position(board_size)
+        #ToDo HERE
         for j,agent in enumerate(self.agent_processor.all_agents):
             single_agent_obs = []
             empty_obs_local_declared = np.zeros((board_size, board_size))
             empty_obs_local_actual = np.zeros((board_size, board_size))
+            incentive_np = np.zeros((board_size, board_size))
             for land in agent.land_cells_owned:
                 empty_obs_local_declared[land.x, land.y] = land.bag_pointer_declared / 100
                 empty_obs_local_actual[land.x, land.y] = land.bag_pointer_actual / 100
-
+                incentive_np[land.x, land.y] = incentive[j]
             single_agent_obs.append(
-                np.array([empty_obs_local_actual])*incentive[j])  # ToDo Deleting actual bag for debugging purposes
+                np.array([empty_obs_local_actual,incentive_np]))#'''*incentive[j]'''')  # ToDo Deleting actual bag for debugging purposes
             land_per_agent_obs.append(single_agent_obs)
+        empty_obs_declared, empty_obs_actual, incentive_global = self.get_global_state_without_position(board_size,
+                                                                                                        incentive) #ToDo moved from THERE TO HERE
         # land_per_agent_obs.append(np.array([empty_obs_declared]))
-        global_obs = np.array([empty_obs_actual])
+        print("bla bla {}".format(incentive_global))
+        global_obs = np.array([empty_obs_actual,incentive_global])
         return land_per_agent_obs, global_obs
 
-    def get_global_state_without_position(self, board_size):
+    def get_global_state_without_position(self, board_size,incentive):
         empty_obs_declared = np.zeros((board_size, board_size))
         empty_obs_actual = np.zeros((board_size, board_size))
-        for agent in self.agent_processor.all_agents:
+        incentive_np_global = np.zeros((board_size, board_size))
+        for j,agent in enumerate(self.agent_processor.all_agents):
             for land in agent.land_cells_owned:
                 empty_obs_declared[land.x, land.y] = land.bag_pointer_declared / 100
                 empty_obs_actual[land.x, land.y] = land.bag_pointer_actual / 100
-        return empty_obs_declared, empty_obs_actual
+                incentive_np_global[land.x, land.y] = incentive[j]
+        return empty_obs_declared, empty_obs_actual,incentive_np_global
 
     def render(self, mode='human'):
         self.grid.drawGrid()
