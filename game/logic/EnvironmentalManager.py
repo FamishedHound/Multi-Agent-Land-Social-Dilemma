@@ -7,7 +7,7 @@ from math import e
 from game.logic import PolinattorsProcessor
 import math
 
-
+#Spreading manager
 class EnvironmentalManager:
     def __init__(self, pollinators_processor: PolinattorsProcessor):
         self.pollinators_processor = pollinators_processor

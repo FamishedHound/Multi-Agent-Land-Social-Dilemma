@@ -6,7 +6,7 @@ from scipy.spatial import distance
 from game.visuals.Grid import Grid
 from game.GlobalParamsGame import GlobalParamsAi, GlobalParamsGame
 
-
+#Utility and pollination range and formuka
 class PolinattorsProcessor:
     def __init__(self, grid: Grid):
         self.grid = grid

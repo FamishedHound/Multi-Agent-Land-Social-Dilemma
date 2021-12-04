@@ -15,9 +15,10 @@ class ActionProcessor:
     def all_agents_make_a_move(self, actions):
 
         counter = 0
-        print(f"epsilon is {self.epsilon}")
+        #print(f"epsilon is {self.epsilon}")
         lands_reward = []
         for i, agent in enumerate(self.all_agents):
+            #print(f"these are actions {actions}")
             lands_reward.append(agent.make_a_decision(actions[i], self.epsilon))
 
             counter += 1

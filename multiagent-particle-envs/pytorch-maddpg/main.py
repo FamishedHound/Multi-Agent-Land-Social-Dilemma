@@ -5,6 +5,7 @@ from MADDPG import MADDPG
 import numpy as np
 import torch as th
 
+from MCTS.mcts.DPW import DPW
 from ai.goverment_agent import meta_agent
 from game.gym_pollinator_game import gymDriver
 from params import scale_reward
@@ -30,6 +31,7 @@ world = gymDriver()
 
 reward_record = []
 from ai import goverment_agent
+
 np.random.seed(1234)
 th.manual_seed(1234)
 world.seed(1234)
@@ -52,11 +54,14 @@ buffer_action = None
 buffer_counter = 0
 cum_reward = []
 import matplotlib.pyplot as plt
-(obs,global_state) = world.reset()
+
+(obs, global_state) = world.reset()
 worlds_all_agents = world.agent_processor.all_agents
 maddpg = MADDPG(world.n_agents, 12, n_actions, batch_size, capacity,
                 episodes_before_train, worlds_all_agents)
 FloatTensor = th.cuda.FloatTensor if maddpg.use_cuda else th.FloatTensor
+
+model = DPW(maddpg=maddpg,alpha=0.3, beta=0.2, initial_obs=obs, env=world, K=3 ** 0.5)
 
 
 def handle_exploration():
@@ -95,41 +100,31 @@ for i_episode in range(n_episode):
         incentive = meta.distribute_incetive()
         if epsilon > randy_random:
             action = maddpg.select_action(obs, worlds_all_agents)
-            print(f" NEURAL ACTION agent 0  {[round(x.item(), 2) for x in action[0]]}")
-            print(f" NEURAL ACTION agent 1  {[round(x.item(), 2) for x in action[1]]}")
-            print(f" NEURAL ACTION agent 2  {[round(x.item(), 2) for x in action[2]]}")
-            print(f" NEURAL ACTION agent 3  {[round(x.item(), 2) for x in action[3]]}")
+
             action = make_random_action(worlds_all_agents)
-            # if buffer_counter % 2 ==0:
-            #     buffer_counter=0
-            #
-            # if buffer_counter==0:
-            #     buffer_action = action
-            # buffer_counter+=1
-            #
-            # action = buffer_action
 
         else:
             # maddpg.batch_size= 32
             action = maddpg.select_action(obs, worlds_all_agents)
-            print(f" NEURAL ACTION agent 0  {[round(x.item(), 2) for x in action[0]]}")
-            print(f" NEURAL ACTION agent 1  {[round(x.item(), 2) for x in action[1]]}")
-            print(f" NEURAL ACTION agent 2  {[round(x.item(), 2) for x in action[2]]}")
-            print(f" NEURAL ACTION agent 3  {[round(x.item(), 2) for x in action[3]]}")
-        # randy_random_2 = random.randint(0,1)
-        # if randy_random_2 ==0:
-        #     action = [[th.tensor(0.2)]]
-        # else:
-        #     action = [[th.tensor(0.6)]]
-        # choice = random.uniform(0, 1)#random.choice([0.1, 0.2,0.3,0.4,0.5,0.6])
-        # action = [[th.tensor(choice).float()]]
+
 
         agents_actions = [f'''agent {i} made actions {a} \n ''' for i, a in enumerate(action)]
-        print(f" action for the game {agents_actions}")
+        #print(f" action for the game {agents_actions}")
         # action = th.from_numpy(action_np)
         # obs_, reward, done, _ = world.step(action, randy_random_2)
-        (obs_, global_state_), reward, done, _ = world.step(action,None,incentive)
-
+        if epsilon==0.4:
+            model.learn(20, maddpg,worlds_all_agents,obs,meta,world, progress_bar=True)
+            incentive = model.best_action()
+        #print(f"BEST ACTION {incentive}")
+        (obs_, global_state_), reward, done, _ = world.step(action, None, incentive,True)
+       # observation, reward, done, info = world.step(action, None, action_incentive)
+        #model.forward(action_incentive, obs_)
+        #print("reward: {}\nnew state: {}".format(reward, np.round(obs_, 2)))
+        # done = False
+        # model.learn(10000, progress_bar=True)
+        # action = model.best_action()
+        # observation, reward, done, info = env.step(action)
+        # model.forward(action, observation)
         # reward = th.FloatTensor(reward).type(FloatTensor)
         # obs_ = np.stack(obs_)
         # obs_ = th.from_numpy(obs_).float()
@@ -143,7 +138,7 @@ for i_episode in range(n_episode):
         # rr += reward.cpu()
         # obs_ = np.concatenate([np.expand_dims(obs[2], 0), obs_], 0)
 
-        maddpg.memory.push(obs, action, obs_, reward,global_state,global_state_)
+        maddpg.memory.push(obs, action, obs_, reward, global_state, global_state_)
         obs = next_obs
         global_state = next_global_state
         cum_reward.append(sum(reward))
