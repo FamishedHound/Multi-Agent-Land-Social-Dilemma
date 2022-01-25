@@ -17,29 +17,30 @@ class AgentProcessor:
         self.agents_pos_memory = set()
         # ToDo rewrite this shit
         while len(self.all_agents) != GlobalParamsAi.NUMBER_OF_AGENTS:
-            x,y = self.generate_two_random_numbers_that_does_not_hold_agent()
-            cell =self.grid.get_cell((x,y))
-
+            x, y = self.generate_two_random_numbers_that_does_not_hold_agent()
+            cell = self.grid.get_cell((x, y))
 
             new_agent = MADDPGAGENT(counter_agent_id, x,
-                                       y, 25, "RuleBasedAgent")
+                                    y, 25, "RuleBasedAgent")
             new_agent.land_cells_owned.append(cell)
             self.set_ownership_of_land_piece(new_agent, cell)
             if new_agent not in self.all_agents:
                 self.all_agents.append(new_agent)
             counter_agent_id += 1
         self.grid = grid
+
     def generate_two_random_numbers_that_does_not_hold_agent(self):
         while True:
 
-            x = random.randint(0, GlobalParamsGame.MAX_CELLS_NUMER-1)
-            y = random.randint(0, GlobalParamsGame.MAX_CELLS_NUMER-1)
-            if (x,y) not in self.agents_pos_memory:
-                self.agents_pos_memory.add((x,y))
-                return x,y
+            x = random.randint(0, GlobalParamsGame.MAX_CELLS_NUMER - 1)
+            y = random.randint(0, GlobalParamsGame.MAX_CELLS_NUMER - 1)
+            if (x, y) not in self.agents_pos_memory:
+                self.agents_pos_memory.add((x, y))
+                return x, y
+
     def seperate_land(self):
 
-        #self.generate_agents_intial_positions()
+        # self.generate_agents_intial_positions()
         self.distribute_unoccupied_land()
 
     # def generate_agents_intial_positions(self):
@@ -61,48 +62,81 @@ class AgentProcessor:
     def distribute_unoccupied_land(self):
         done = False
         counter = 0
+
+        for i, agent in enumerate(self.all_agents):
+
+            if i == 0:
+                cells = [self.grid.all_cells[(0, 0)], self.grid.all_cells[(1, 0)], self.grid.all_cells[(2, 0)],
+                         self.grid.all_cells[(3, 0)]]
+                for land in cells:
+                    agent.land_cells_owned.append(land)
+                    self.set_ownership_of_land_piece(agent, land)
+            if i==1:
+                cells = [self.grid.all_cells[(0, 1)], self.grid.all_cells[(1, 1)], self.grid.all_cells[(2, 1)],
+                         self.grid.all_cells[(0, 2)],self.grid.all_cells[(0, 3)]]
+                for land in cells:
+                    agent.land_cells_owned.append(land)
+                    self.set_ownership_of_land_piece(agent, land)
+            if i==2:
+                cells = [self.grid.all_cells[(1, 2)], self.grid.all_cells[(2, 2)], self.grid.all_cells[(1, 3)],
+                         self.grid.all_cells[(2, 3)]]
+                for land in cells:
+                    agent.land_cells_owned.append(land)
+                    self.set_ownership_of_land_piece(agent, land)
+            if i == 3:
+                cells = [self.grid.all_cells[(3, 1)], self.grid.all_cells[(3, 2)], self.grid.all_cells[(3, 3)]]
+                for land in cells:
+                    agent.land_cells_owned.append(land)
+                    self.set_ownership_of_land_piece(agent, land)
+
+
+            counter += 1
+        # for x in self.grid.all_cells.values():
+        #     if not x.is_owned:
+        #         exit("not all lands where distributed")
+
+
+'''
+OLD logic for seperating the land 
+
         while not done:
             done = True
             for x in self.grid.all_cells.values():
                 if not x.is_owned:
                     done = False
+            # Fixing the scenario for 4x4 grid and 4 agents
+# agent = agent
+                # if agent.predefined_number_of_lands > len(agent.land_cells_owned):
+                #     counters = 0
+                #     while counters < len(agent.land_cells_owned):
+                # 
+                #         curr_land = agent.land_cells_owned[counters]
+                #         if curr_land.x + 1 < GlobalParamsGame.MAX_CELLS_NUMER:
+                #             cell = self.grid.all_cells[(curr_land.x + 1, curr_land.y)]
+                #             if not cell.is_owned:
+                #                 agent.land_cells_owned.append(cell)
+                #                 self.set_ownership_of_land_piece(agent, cell)
+                #                 break
+                #         if curr_land.x - 1 >= 0:
+                #             cell = self.grid.all_cells[(curr_land.x - 1, curr_land.y)]
+                #             if not cell.is_owned:
+                #                 agent.land_cells_owned.append(cell)
+                #                 self.set_ownership_of_land_piece(agent, cell)
+                #                 break
+                #         if curr_land.y + 1 < GlobalParamsGame.MAX_CELLS_NUMER:
+                #             cell = self.grid.all_cells[(curr_land.x, curr_land.y + 1)]
+                #             if not cell.is_owned:
+                #                 agent.land_cells_owned.append(cell)
+                #                 self.set_ownership_of_land_piece(agent, cell)
+                #                 break
+                #         if curr_land.y - 1 >= 0:
+                #             cell = self.grid.all_cells[(curr_land.x, curr_land.y - 1)]
+                #             if not cell.is_owned:
+                #                 agent.land_cells_owned.append(cell)
+                #                 self.set_ownership_of_land_piece(agent, cell)
+                #                 break
+                # 
+                #         counters += 1
 
-            for agent in self.all_agents:
 
-                agent = agent
-                if agent.predefined_number_of_lands > len(agent.land_cells_owned):
-                    counters = 0
-                    while counters < len(agent.land_cells_owned):
-
-                        curr_land = agent.land_cells_owned[counters]
-                        if curr_land.x + 1 < GlobalParamsGame.MAX_CELLS_NUMER:
-                            cell = self.grid.all_cells[(curr_land.x + 1, curr_land.y)]
-                            if not cell.is_owned:
-                                agent.land_cells_owned.append(cell)
-                                self.set_ownership_of_land_piece(agent, cell)
-                                break
-                        if curr_land.x - 1 >= 0:
-                            cell = self.grid.all_cells[(curr_land.x - 1, curr_land.y)]
-                            if not cell.is_owned:
-                                agent.land_cells_owned.append(cell)
-                                self.set_ownership_of_land_piece(agent, cell)
-                                break
-                        if curr_land.y + 1 < GlobalParamsGame.MAX_CELLS_NUMER:
-                            cell = self.grid.all_cells[(curr_land.x, curr_land.y + 1)]
-                            if not cell.is_owned:
-                                agent.land_cells_owned.append(cell)
-                                self.set_ownership_of_land_piece(agent, cell)
-                                break
-                        if curr_land.y - 1 >= 0:
-                            cell = self.grid.all_cells[(curr_land.x, curr_land.y - 1)]
-                            if not cell.is_owned:
-                                agent.land_cells_owned.append(cell)
-                                self.set_ownership_of_land_piece(agent, cell)
-                                break
-
-                        counters += 1
-
-                counter += 1
-        for x in self.grid.all_cells.values():
-            if not x.is_owned:
-                exit("not all lands where distributed")
+'''

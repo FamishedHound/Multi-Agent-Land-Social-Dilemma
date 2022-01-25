@@ -1,4 +1,5 @@
 import random
+import warnings
 from time import sleep
 
 from MADDPG import MADDPG
@@ -38,12 +39,12 @@ world.seed(1234)
 
 n_states = 213
 n_actions = 1
-capacity = 5000
-batch_size = 32
+capacity = 6000
+batch_size = 16
 n_episode = 20000
 max_steps = 100000000
 episodes_before_train = 10
-epsilon = 1
+epsilon = 1.2
 win = None
 param = None
 obs = world.reset()
@@ -58,12 +59,14 @@ import matplotlib.pyplot as plt
 (obs, global_state) = world.reset()
 worlds_all_agents = world.agent_processor.all_agents
 maddpg = MADDPG(world.n_agents, 12, n_actions, batch_size, capacity,
-                episodes_before_train, worlds_all_agents)
+                episodes_before_train, worlds_all_agents,False)
 FloatTensor = th.cuda.FloatTensor if maddpg.use_cuda else th.FloatTensor
 
-model = DPW(maddpg=maddpg,alpha=0.3, beta=0.2, initial_obs=obs, env=world, K=3 ** 0.5)
-
-
+model = DPW(maddpg=maddpg, alpha=0.3, beta=0.2, initial_obs=obs, env=world, K=3 ** 0.5)
+meta = meta_agent(None, None, worlds_all_agents)
+counters = 0
+buffer = [0,0,0,0]
+warnings.filterwarnings("ignore")
 def handle_exploration():
     global epsilon
     if maddpg.episode_done >= batch_size:
@@ -72,13 +75,13 @@ def handle_exploration():
         # elif epsilon <  0.6 and epsilon > 0.3:
         #     epsilon -= 1e-4
         # el
-        if round(epsilon * 1000) % 211 == 0 and epsilon == 0.3:
+        if round(epsilon * 1000) % 211 == 0 and epsilon == 0.2:
             plt.plot(cum_reward)
             plt.show()
-        if epsilon > 0.4:
-            epsilon -= 1e-4
+        if epsilon > 0.2:
+            epsilon -= 1e-4 # 0.0001
         else:
-            epsilon = 0.4
+            epsilon = 0.2
 
 
 for i_episode in range(n_episode):
@@ -96,10 +99,14 @@ for i_episode in range(n_episode):
 
         # obs = obs.type(FloatTensor)
         randy_random = random.uniform(0, 1)
-        meta = meta_agent(None, None, worlds_all_agents)
-        incentive = meta.distribute_incetive()
+        if epsilon==0.2:
+            incentive =meta.optimise_incentives(obs,worlds_all_agents,maddpg.actors,epsilon)
+        else:
+            incentive =[0,0,0,0] #meta.optimise_incentives(obs,worlds_all_agents,maddpg.actors,epsilon)
+
         if epsilon > randy_random:
             action = maddpg.select_action(obs, worlds_all_agents)
+
 
             action = make_random_action(worlds_all_agents)
 
@@ -107,19 +114,41 @@ for i_episode in range(n_episode):
             # maddpg.batch_size= 32
             action = maddpg.select_action(obs, worlds_all_agents)
 
-
-        agents_actions = [f'''agent {i} made actions {a} \n ''' for i, a in enumerate(action)]
-        #print(f" action for the game {agents_actions}")
+        agents_actions = ''.join(f'''agent {i} made actions {a} \n ''' for i, a in enumerate(action))
+        print(agents_actions)
+        # print(f" action for the game {agents_actions}")
         # action = th.from_numpy(action_np)
         # obs_, reward, done, _ = world.step(action, randy_random_2)
-        if epsilon==0.4:
-            model.learn(20, maddpg,worlds_all_agents,obs,meta,world, progress_bar=True)
-            incentive = model.best_action()
-        #print(f"BEST ACTION {incentive}")
-        (obs_, global_state_), reward, done, _ = world.step(action, None, incentive,True)
-       # observation, reward, done, info = world.step(action, None, action_incentive)
-        #model.forward(action_incentive, obs_)
-        #print("reward: {}\nnew state: {}".format(reward, np.round(obs_, 2)))
+        print("Epsilon is {}".format(epsilon))
+        if epsilon <= 0.4:
+            counters += 1
+            # maddpg.save_weights_of_networks("before_curriculum")
+            print("The COUNTER IS {}".format(counters))
+        if epsilon<=0.4:
+            if counters>=500 and counters<=2000:
+                incentive = meta.distribute_incetive()
+            elif counters>=2000 and counters<3000:
+                incentive = meta.distribute_incentive_2()
+                # if counters==7999:
+                #     maddpg.save_weights_of_networks("after_curriculum")
+                #     exit("Training completed")
+
+
+
+        # if counters>8000:
+        #
+        #     model.learn(10, maddpg, worlds_all_agents, obs, meta, world, progress_bar=True)
+        #     incentive = model.best_action()
+        #     buffer= incentive
+        #     #counters=0
+        #     #maddpg.memory.flush_memory()
+        #     print(f"BEST ACTION {incentive}")
+        #     print(f"agent target is \n {meta.target}")
+        #     print(meta.target)
+        (obs_, global_state_), reward, done, _ = world.step(action, None, incentive, True)
+        # observation, reward, done, info = world.step(action, None, action_incentive)
+        # model.forward(action_incentive, obs_)
+        # print("reward: {}\nnew state: {}".format(reward, np.round(obs_, 2)))
         # done = False
         # model.learn(10000, progress_bar=True)
         # action = model.best_action()
@@ -137,7 +166,7 @@ for i_episode in range(n_episode):
         # total_reward += reward.sum()
         # rr += reward.cpu()
         # obs_ = np.concatenate([np.expand_dims(obs[2], 0), obs_], 0)
-
+        #ToDo switch around obs -> old version obs,obs_ , new obs_, obs
         maddpg.memory.push(obs, action, obs_, reward, global_state, global_state_)
         obs = next_obs
         global_state = next_global_state
