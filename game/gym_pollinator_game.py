@@ -24,7 +24,7 @@ class gymDriver(gym.Env):
         self.polinattor_processor = PolinattorsProcessor(grid=self.grid)
         self.n_agents = GlobalParamsGame.GlobalParamsAi.NUMBER_OF_AGENTS
         self.agent_processor = AgentProcessor(grid=self.grid, pollinators_processor=self.polinattor_processor)
-        self.agent_processor.seperate_land()
+        #self.agent_processor.seperate_land()
         self.agent_processor.clear_empty_agents()
         self.action_processor = ActionProcessor(all_agents=self.agent_processor.all_agents,
                                                 pollinator_processor=self.polinattor_processor)
@@ -32,7 +32,7 @@ class gymDriver(gym.Env):
         self.clockobject = pygame.time.Clock()
         self.action_space = spaces.Box(-1, 1, shape=[4])
         self.environmental_manager = EnvironmentalManager(self.polinattor_processor)
-        self.environmental_manager.process_declared_lands()
+        #self.environmental_manager.process_declared_lands()
         self.economy_manager = EconomyManager(self.agent_processor.all_agents, self.polinattor_processor)
         self.counter = 0
         self.index = 0
@@ -60,14 +60,15 @@ class gymDriver(gym.Env):
         pollinators_reward = 0
 
         for land in self.grid.all_cells.values():
-            pollinators_reward += (land.bag_pointer_actual / 100) / len(self.grid.all_cells)
+            if land.was_pollinated:
+                pollinators_reward += (land.bag_pointer_actual / 100) / len(self.grid.all_cells)
         # print(f"Global pollinators reward {pollinators_reward}")
         return pollinators_reward
 
     def _get_reward(self, incentive, render):
         agents_rewards = []
         global_pollinators_reward = self.get_global_pollinators_reward()
-
+        reward_without_incentive =[]
         for j, agent in enumerate(self.agent_processor.all_agents):
 
             cumulative_reward = 0
@@ -79,18 +80,20 @@ class gymDriver(gym.Env):
 
             money_reward = cumulative_reward / len(agent.land_cells_owned)
             #          0-1   0.9  * 0.9   + 0.1 * 0.35
-            final_reward = agent.alpha * (money_reward) + (1 - agent.alpha) * global_pollinators_reward + incentive[
-                j]*2 # incentive 0-1 you can divide by 2 everything
+            reward_internal = agent.alpha * (money_reward) + (1 - agent.alpha) * global_pollinators_reward/2
+            final_reward = incentive[j] # incentive 0-1 you can divide by 2 everything#ToDo just money reword for debugging
             # agent.money += incentive[j] * 1000
             if render:
                 print(
                     f"AGENT:{agent.id} his alpha is {agent.alpha} money :{money_reward}"
-                    f" env :{round(global_pollinators_reward, 2)}"
-                    f" incentive : {incentive[j]*2 }"
+                    f" env :{round(global_pollinators_reward/2, 2)}"
+                    f" incentive : {incentive[j] }"
                     f" final_reward : {final_reward} ")
-
+            if final_reward<0:
+                final_reward=0
             agents_rewards.append(final_reward)
-        return agents_rewards
+            reward_without_incentive.append(reward_internal)
+        return agents_rewards,reward_without_incentive
 
     def _create_observation(self, incentive):
         board_size = int(GlobalParamsGame.GlobalParamsGame.WINDOW_HEIGHT / GlobalParamsGame.GlobalParamsGame.BLOCKSIZE)
@@ -108,8 +111,10 @@ class gymDriver(gym.Env):
                 incentive_np[land.x, land.y] = incentive[j]
 
             single_agent_obs.append(
-                np.array([empty_obs_local_actual,
+                np.array([empty_obs_local_actual,                       #ToDo deleting incentive
                           incentive_np]))  # '''*incentive[j]'''')  # ToDo Deleting actual bag for debugging purposes
+            # single_agent_obs.append(
+            #         np.array([empty_obs_local_actual]))
             land_per_agent_obs.append(single_agent_obs)
         empty_obs_declared, empty_obs_actual, incentive_global = self.get_global_state_without_position(board_size,
                                                                                                         incentive)  # ToDo moved from THERE TO HERE
@@ -137,7 +142,13 @@ class gymDriver(gym.Env):
     def step(self, action=None, randy_random=None, incentive=None, render=False):
         if isinstance(action, np.ndarray):
             action = [action.tolist()]
-        print(f"AGENTS WILL DO THE FOLLOWING ACTION {action}")
+        if randy_random:
+            for i,output in enumerate(action):
+                printer =[]
+                for x in output:
+                    printer.append(int(round(x.item(),2)*100))
+                print(f"agent {i} state is {printer}           average: {sum(printer)/len(printer)*100}")
+            print(f"AGENTS WILL DO THE FOLLOWING ACTION {action}")
         self.action_processor.all_agents_make_a_move(action)
         self.polinattor_processor.clear_pollinators()
         self.environmental_manager.process_declared_lands()
@@ -150,21 +161,14 @@ class gymDriver(gym.Env):
 
         if render:
             self.render()
-        reward = self._get_reward(incentive, render)
+        reward,reward_without_incentive = self._get_reward(incentive, render)
 
-        state_of_game = []
-        for a in self.agent_processor.all_agents:
-            agents_land = []
-            for l in a.land_cells_owned:
-                agents_land.append(l.bag_pointer_actual)
-            state_of_game.append(agents_land)
-        output_state_of_the_game = ''.join(f"{x}         with mean for agent: {str(sum(x)/len(x))}\n" for x in state_of_game)
-        if render:
-            print(f"state of the game \n{output_state_of_the_game}")
+        #
+
         observation = self._create_observation(incentive)
         # print(f"rewards per agent {reward}")
         #self.create_actions_channels(action, observation, reward)
-        return observation, reward, done, None
+        return observation, (reward,reward_without_incentive), done, None
 
     def create_actions_channels(self, action, img, reward):
         import pickle

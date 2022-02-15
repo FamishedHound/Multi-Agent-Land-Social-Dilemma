@@ -10,11 +10,11 @@ class MADDPGAGENT(Agent):
         if id ==0:
             self.alpha=0.99
         elif id==1:
-            self.alpha = 0.9
+            self.alpha = 0.3
         elif id==2:
-            self.alpha=0.3
+            self.alpha=0.8
         else:
-            self.alpha=0.5
+            self.alpha=0.6
         self.trust_factor = round(random.uniform(0.0,1),2)
     def select_action(self, neural_net_output_number):
         a_bag_numbers = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
@@ -33,6 +33,7 @@ class MADDPGAGENT(Agent):
 
             bad_size_declared = self.select_action(action[i])
             land.bag_pointer_declared = bad_size_declared
+            land.bag_pointer_actual = bad_size_declared
             decisions.append(bad_size_declared)
         return decisions
 

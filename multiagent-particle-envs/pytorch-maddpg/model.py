@@ -19,11 +19,8 @@ class Critic(nn.Module):
         act_dim = 1
         print(f"critic dims {dim_observation*12+dim_observation}")
         self.FC1 = nn.Linear(32+dim_observation, 512)
-        #self.norm1 = nn.BatchNorm1d(dim_observation)
         self.FC2 = nn.Linear(512, 1024)
-        #self.norm2 = nn.BatchNorm1d(act_dim)
-        #self.FC3 = nn.Linear(2048, 1024)
-        #self.norm3 = nn.BatchNorm1d(512)
+        self.FC3 = nn.Linear(1024, 512)
         self.FC4 = nn.Linear(1024, 1)
 
     # obs: batch_size * obs_dim
@@ -34,11 +31,9 @@ class Critic(nn.Module):
         obs = th.flatten(obs.float())
         acts = th.flatten(acts).float()
 
-        #combined = th.cat([obs, acts], 0)
         combined = th.cat([obs, acts], 0)
 
         result = F.relu(self.FC1(combined))
-
         result = F.relu(self.FC2(result))
         result =  self.FC4(result)
 
@@ -58,15 +53,17 @@ class Actor(nn.Module):
         super(Actor, self).__init__()
         print(f"agent dims {dim_observation*18}")
         self.FC1 = nn.Linear(32, 512)
-        self.FC2 = nn.Linear(512, 512)
+        self.FC2 = nn.Linear(512, 1024)
+        self.FC3 = nn.Linear(2048, 1024)
 
-        self.FC4 = nn.Linear(512, dim_observation)
+        self.FC4 = nn.Linear(1024, dim_observation)
 
     # action output between -2 and 2
     def forward(self, obs):
         obs = th.flatten(obs)
         result = F.relu(self.FC1(obs))
         result = F.relu(self.FC2(result))
+
 
         result = self.FC4(result)
         result = th.sigmoid(result)
@@ -78,7 +75,7 @@ class MultiPurposemetaLearner(nn.Module):
         self.number_of_agents = GlobalParamsAi.NUMBER_OF_AGENTS
         self.FC1 = nn.Linear(16, 512)
         self.FC2 = nn.Linear(512, 1028)
-        self.FC3 = nn.Linear(1028, self.number_of_agents)
+
 
         self.FC4_ = nn.Linear(1028, 2056)
 
@@ -88,7 +85,7 @@ class MultiPurposemetaLearner(nn.Module):
         obs = th.flatten(obs)
         result = F.relu(self.FC1(obs))
         result = F.relu(self.FC2(result))
-        result = F.relu(self.FC3(result))
+
         result = F.softmax(result,dim=1)
 
         #Possibly multiply

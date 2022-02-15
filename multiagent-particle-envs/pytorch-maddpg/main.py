@@ -39,12 +39,12 @@ world.seed(1234)
 
 n_states = 213
 n_actions = 1
-capacity = 6000
+capacity = 50000
 batch_size = 16
-n_episode = 20000
+n_episode = 500
 max_steps = 100000000
 episodes_before_train = 10
-epsilon = 1.2
+epsilon = 1
 win = None
 param = None
 obs = world.reset()
@@ -65,8 +65,14 @@ FloatTensor = th.cuda.FloatTensor if maddpg.use_cuda else th.FloatTensor
 model = DPW(maddpg=maddpg, alpha=0.3, beta=0.2, initial_obs=obs, env=world, K=3 ** 0.5)
 meta = meta_agent(None, None, worlds_all_agents)
 counters = 0
-buffer = [0,0,0,0]
+incentive = [0,0,0,0]
 warnings.filterwarnings("ignore")
+flag_for_incentive = False
+flag_for_real_action = False
+incentive_reward = []
+before_incentive_reward = []
+difference_in_reward = []
+reward =[]
 def handle_exploration():
     global epsilon
     if maddpg.episode_done >= batch_size:
@@ -75,13 +81,15 @@ def handle_exploration():
         # elif epsilon <  0.6 and epsilon > 0.3:
         #     epsilon -= 1e-4
         # el
-        if round(epsilon * 1000) % 211 == 0 and epsilon == 0.2:
+        #epsilon -= 1e-4  # 0.0001
+        #ToDo static epsilon going 0
+        if round(epsilon * 1000) % 211 == 0 and epsilon == 0.3:
             plt.plot(cum_reward)
             plt.show()
-        if epsilon > 0.2:
+        if epsilon > 0.3:
             epsilon -= 1e-4 # 0.0001
         else:
-            epsilon = 0.2
+            epsilon = 0.3
 
 
 for i_episode in range(n_episode):
@@ -99,19 +107,23 @@ for i_episode in range(n_episode):
 
         # obs = obs.type(FloatTensor)
         randy_random = random.uniform(0, 1)
-        if epsilon==0.2:
-            incentive =meta.optimise_incentives(obs,worlds_all_agents,maddpg.actors,epsilon)
-        else:
-            incentive =[0,0,0,0] #meta.optimise_incentives(obs,worlds_all_agents,maddpg.actors,epsilon)
-
+        # if counters>=13000:
+        #
+        #     flag_for_incentive = True
+        #     incentive =meta.optimise_incentives(obs,worlds_all_agents,maddpg.actors,maddpg.critics)
+        # else:
+        #     incentive =[0,0,0,0] #meta.optimise_incentives(obs,worlds_all_agents,maddpg.actors,epsilon)
+        #incentive = meta.optimise_incentives(obs, worlds_all_agents, maddpg.actors, maddpg.critics)
+        incentive = meta.optimise_incentives(obs, worlds_all_agents, maddpg.actors, maddpg.critics)
         if epsilon > randy_random:
             action = maddpg.select_action(obs, worlds_all_agents)
-
+            flag_for_real_action = False
 
             action = make_random_action(worlds_all_agents)
 
         else:
             # maddpg.batch_size= 32
+            flag_for_real_action = True
             action = maddpg.select_action(obs, worlds_all_agents)
 
         agents_actions = ''.join(f'''agent {i} made actions {a} \n ''' for i, a in enumerate(action))
@@ -124,16 +136,24 @@ for i_episode in range(n_episode):
             counters += 1
             # maddpg.save_weights_of_networks("before_curriculum")
             print("The COUNTER IS {}".format(counters))
-        if epsilon<=0.4:
-            if counters>=500 and counters<=2000:
-                incentive = meta.distribute_incetive()
-            elif counters>=2000 and counters<3000:
-                incentive = meta.distribute_incentive_2()
+        # if epsilon<=0.4:
+        if counters>=4000 and counters<=13000:
+            incentive = meta.distribute_incetive()
+
                 # if counters==7999:
                 #     maddpg.save_weights_of_networks("after_curriculum")
                 #     exit("Training completed")
 
+        if counters>=22000:
+            import pickle
 
+            with open('before_incentive_reward2.pkl', 'wb') as f:
+                pickle.dump(before_incentive_reward, f)
+            with open('incentive_reward2.pkl', 'wb') as f:
+                pickle.dump(incentive_reward, f)
+            with open('difference_in_reward2.pkl', 'wb') as f:
+                pickle.dump(difference_in_reward, f)
+            exit(1)
 
         # if counters>8000:
         #
@@ -145,7 +165,17 @@ for i_episode in range(n_episode):
         #     print(f"BEST ACTION {incentive}")
         #     print(f"agent target is \n {meta.target}")
         #     print(meta.target)
-        (obs_, global_state_), reward, done, _ = world.step(action, None, incentive, True)
+        (obs_, global_state_), (reward,reward_without_incentive), done, _ = world.step(action, flag_for_real_action, incentive, True)
+
+        if not flag_for_incentive and flag_for_real_action  :
+            before_incentive_reward.append(sum(reward)/4)
+            difference_in_reward.append(sum(reward_without_incentive)/4)
+        elif flag_for_incentive :
+            incentive_reward.append(sum(reward)/4)
+            difference_in_reward.append(sum(reward_without_incentive)/4)
+        # if counters>=9000:
+        #
+        #     exit(1)
         # observation, reward, done, info = world.step(action, None, action_incentive)
         # model.forward(action_incentive, obs_)
         # print("reward: {}\nnew state: {}".format(reward, np.round(obs_, 2)))
