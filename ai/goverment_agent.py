@@ -20,7 +20,8 @@ class meta_agent():
         self.interpreted_agent = None
         self.interpreted_obs = None
         self.counter_networks = 0
-
+        self.decisions = {}
+        self.new_state = None
     def set_this_year_budget(self, new_budget):
         self.budget = new_budget
 
@@ -28,15 +29,15 @@ class meta_agent():
         incentive = []
         for j, agent in enumerate(self.all_agents):
             all_pollinators = 0
-            # for i, land in enumerate(agent.land_cells_owned):
-            #     all_pollinators+=land.bag_pointer_actual/100
-            # if all_pollinators/len(agent.land_cells_owned) >= 0.8:
-            #     incetive = -1
-            # elif all_pollinators/len(agent.land_cells_owned) >= 0.5:
-            #     incetive = -0.6
-            # else:
-            #     incetive=0
-            incetive = random.uniform(-1,1)
+            for i, land in enumerate(agent.land_cells_owned):
+                all_pollinators+=land.bag_pointer_actual/100
+            if all_pollinators/len(agent.land_cells_owned) >= 0.8:
+                incetive = -1
+            elif all_pollinators/len(agent.land_cells_owned) >= 0.5:
+                incetive = -0.6
+            else:
+                incetive=0
+            #incetive = random.uniform(-1,1)
                 #print(f"agent {j} got {all_pollinators/len(agent.land_cells_owned)} and got this incentive {incetive}")
             incentive.append(incetive)
         return incentive
@@ -66,12 +67,14 @@ class meta_agent():
         final_incentive = []
         for i,a in enumerate(agents):
             self.counter_networks = i
+            self.debugging_obs = np.array(obs)[self.counter_networks][0]
             self.interpreted_obs=np.array(obs)[self.counter_networks][0][0]
             self.interpreted_agent=a
             study = optuna.create_study(direction='minimize')
-            study.optimize(self.objective, n_trials=1)
+            study.optimize(self.objective, n_trials=60)
             final_incentive.append(study.best_params['x'])
-
+            print(f"before : \n {self.debugging_obs[1]} \n  after: \n {self.new_state[0][1]}")
+            print(f"here are decisions for agent {self.counter_networks} that would result {self.agent_networks[self.counter_networks](th.from_numpy(self.debugging_obs).unsqueeze(0).unsqueeze(0).float().cuda()).mean().item()} here are optimised {self.decisions[self.counter_networks].mean()}")
         return final_incentive
 
 
@@ -80,14 +83,15 @@ class meta_agent():
         x = trial.suggest_float('x', -1, 1)
         multiplier = 10
         new_incentive = self.get_agents_land_positions(self.interpreted_agent, self.interpreted_obs, x)
-        new_state = th.cat([th.from_numpy(self.interpreted_obs).float().unsqueeze(0), th.from_numpy(new_incentive*multiplier).float().unsqueeze(0)], dim=0).unsqueeze(0)
-        decisions = self.agent_networks[self.counter_networks](
-           new_state.cuda()).squeeze().data
+        self.new_state = th.cat([th.from_numpy(self.interpreted_obs.copy()).float().unsqueeze(0), th.from_numpy(new_incentive.copy()).float().unsqueeze(0)], dim=0).unsqueeze(0)
+        self.decisions[self.counter_networks] = self.agent_networks[self.counter_networks](
+           self.new_state.cuda()).squeeze().data
         # self.critics[self.counter_networks](new_state.cuda(),decisions)
-        return abs(self.target[self.counter_networks]-decisions.mean().item())
+        return abs(self.target[self.counter_networks]-self.decisions[self.counter_networks].mean().item())
     def get_agents_land_positions(self,agent,other_array,incentive ):
         incentive_arr = np.zeros_like(other_array)
         for land in agent.land_cells_owned:
 
             incentive_arr[land.x,land.y] = incentive
+        incentive_arr = np.rot90(incentive_arr)
         return incentive_arr

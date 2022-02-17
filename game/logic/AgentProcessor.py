@@ -67,7 +67,7 @@ class AgentProcessor:
         for i in range(GlobalParamsAi.NUMBER_OF_AGENTS):
 
             if i == 0:
-                agent =  MADDPGAGENT(i, 0,1, 25, "RuleBasedAgent")
+                agent =  MADDPGAGENT(i, 0,0, 25, "RuleBasedAgent")
                 cells = [self.grid.all_cells[(0, 0)], self.grid.all_cells[(0, 1)], self.grid.all_cells[(0, 2)],
                          self.grid.all_cells[(0, 3)]]
                 for land in cells:
@@ -75,24 +75,24 @@ class AgentProcessor:
                     self.set_ownership_of_land_piece(agent, land)
                 self.all_agents.append(agent)
             if i==1:
-                agent = MADDPGAGENT(i, 0, 1, 25, "RuleBasedAgent")
-                cells = [self.grid.all_cells[(0, 1)], self.grid.all_cells[(1, 1)], self.grid.all_cells[(2, 1)],
-                         self.grid.all_cells[(0, 2)],self.grid.all_cells[(0, 3)]]
+                agent = MADDPGAGENT(i, 1, 0, 25, "RuleBasedAgent")
+                cells = [self.grid.all_cells[(1, 0)], self.grid.all_cells[(1, 1)], self.grid.all_cells[(1, 2)],
+                         self.grid.all_cells[(2, 0)],self.grid.all_cells[(3, 0)]]
                 for land in cells:
                     agent.land_cells_owned.append(land)
                     self.set_ownership_of_land_piece(agent, land)
                 self.all_agents.append(agent)
             if i==2:
-                agent = MADDPGAGENT(i, 1, 2, 25, "RuleBasedAgent")
-                cells = [self.grid.all_cells[(1, 2)], self.grid.all_cells[(2, 2)], self.grid.all_cells[(1, 3)],
-                         self.grid.all_cells[(2, 3)]]
+                agent = MADDPGAGENT(i, 2, 1, 25, "RuleBasedAgent")
+                cells = [self.grid.all_cells[(2, 1)], self.grid.all_cells[(2, 2)], self.grid.all_cells[(3, 1)],
+                         self.grid.all_cells[(3, 2)]]
                 for land in cells:
                     agent.land_cells_owned.append(land)
                     self.set_ownership_of_land_piece(agent, land)
                 self.all_agents.append(agent)
             if i == 3:
-                agent = MADDPGAGENT(i, 3, 1, 25, "RuleBasedAgent")
-                cells = [self.grid.all_cells[(3, 1)], self.grid.all_cells[(3, 2)], self.grid.all_cells[(3, 3)]]
+                agent = MADDPGAGENT(i, 1, 3, 25, "RuleBasedAgent")
+                cells = [self.grid.all_cells[(1, 3)], self.grid.all_cells[(2, 3)], self.grid.all_cells[(3, 3)]]
                 for land in cells:
                     agent.land_cells_owned.append(land)
                     self.set_ownership_of_land_piece(agent, land)

@@ -107,14 +107,15 @@ for i_episode in range(n_episode):
 
         # obs = obs.type(FloatTensor)
         randy_random = random.uniform(0, 1)
-        # if counters>=13000:
-        #
-        #     flag_for_incentive = True
-        #     incentive =meta.optimise_incentives(obs,worlds_all_agents,maddpg.actors,maddpg.critics)
-        # else:
-        #     incentive =[0,0,0,0] #meta.optimise_incentives(obs,worlds_all_agents,maddpg.actors,epsilon)
+        if counters>=13000:
+
+            flag_for_incentive = True
+            incentive =meta.optimise_incentives(obs,worlds_all_agents,maddpg.actors,maddpg.critics)
+        else:
+            incentive =[0,0,0,0] #meta.optimise_incentives(obs,worlds_all_agents,maddpg.actors,epsilon)
         #incentive = meta.optimise_incentives(obs, worlds_all_agents, maddpg.actors, maddpg.critics)
-        incentive = meta.optimise_incentives(obs, worlds_all_agents, maddpg.actors, maddpg.critics)
+        #incentive = meta.optimise_incentives(obs, worlds_all_agents, maddpg.actors, maddpg.critics)
+        #incentive = [0, 0, 0, 0]
         if epsilon > randy_random:
             action = maddpg.select_action(obs, worlds_all_agents)
             flag_for_real_action = False
@@ -137,14 +138,15 @@ for i_episode in range(n_episode):
             # maddpg.save_weights_of_networks("before_curriculum")
             print("The COUNTER IS {}".format(counters))
         # if epsilon<=0.4:
-        if counters>=4000 and counters<=13000:
+        if counters>=4000 and counters<=10000:
             incentive = meta.distribute_incetive()
-
+        elif counters>=10000 and counters<13000:
+            incentive = meta.distribute_incentive_2()
                 # if counters==7999:
                 #     maddpg.save_weights_of_networks("after_curriculum")
                 #     exit("Training completed")
 
-        if counters>=22000:
+        if counters>=18000:
             import pickle
 
             with open('before_incentive_reward2.pkl', 'wb') as f:

@@ -81,7 +81,7 @@ class gymDriver(gym.Env):
             money_reward = cumulative_reward / len(agent.land_cells_owned)
             #          0-1   0.9  * 0.9   + 0.1 * 0.35
             reward_internal = agent.alpha * (money_reward) + (1 - agent.alpha) * global_pollinators_reward/2
-            final_reward = incentive[j] # incentive 0-1 you can divide by 2 everything#ToDo just money reword for debugging
+            final_reward = money_reward + incentive[j] # incentive 0-1 you can divide by 2 everything#ToDo just money reword for debugging
             # agent.money += incentive[j] * 1000
             if render:
                 print(
@@ -110,6 +110,10 @@ class gymDriver(gym.Env):
                 empty_obs_local_actual[land.x, land.y] = land.bag_pointer_actual / 100
                 incentive_np[land.x, land.y] = incentive[j]
 
+            empty_obs_local_declared=np.rot90(empty_obs_local_declared)
+            empty_obs_local_actual=np.rot90(empty_obs_local_actual)
+            incentive_np=np.rot90(incentive_np)
+
             single_agent_obs.append(
                 np.array([empty_obs_local_actual,                       #ToDo deleting incentive
                           incentive_np]))  # '''*incentive[j]'''')  # ToDo Deleting actual bag for debugging purposes
@@ -118,6 +122,8 @@ class gymDriver(gym.Env):
             land_per_agent_obs.append(single_agent_obs)
         empty_obs_declared, empty_obs_actual, incentive_global = self.get_global_state_without_position(board_size,
                                                                                                         incentive)  # ToDo moved from THERE TO HERE
+        empty_obs_actual = np.rot90(empty_obs_actual)
+        incentive_global = np.rot90(incentive_global)
         # land_per_agent_obs.append(np.array([empty_obs_declared]))
         # print("bla bla {}".format(incentive_global))
         global_obs = np.array([empty_obs_actual, incentive_global])
