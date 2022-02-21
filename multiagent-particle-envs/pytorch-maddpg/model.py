@@ -19,9 +19,9 @@ class Critic(nn.Module):
         act_dim = 1
         print(f"critic dims {dim_observation*12+dim_observation}")
         self.FC1 = nn.Linear(32+dim_observation, 512)
-        self.FC2 = nn.Linear(512, 1024)
+        self.FC2 = nn.Linear(512, 512)
         self.FC3 = nn.Linear(1024, 512)
-        self.FC4 = nn.Linear(1024, 1)
+        self.FC4 = nn.Linear(512, 1)
 
     # obs: batch_size * obs_dim
     def forward(self, obs, acts):
@@ -52,9 +52,9 @@ class Actor(nn.Module):
     def __init__(self, dim_observation, dim_action):
         super(Actor, self).__init__()
         print(f"agent dims {dim_observation*18}")
-        self.FC1 = nn.Linear(32, 512)
-        self.FC2 = nn.Linear(512, 1024)
-        self.FC3 = nn.Linear(2048, 1024)
+        self.FC1 = nn.Linear(32, 1024)
+        self.FC2 = nn.Linear(1024, 1024)
+        self.FC3 = nn.Linear(1024, 512)
 
         self.FC4 = nn.Linear(1024, dim_observation)
 

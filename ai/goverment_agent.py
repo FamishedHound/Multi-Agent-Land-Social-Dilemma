@@ -56,6 +56,40 @@ class meta_agent():
                 # print(f"agent {j} got {all_pollinators/len(agent.land_cells_owned)} and got this incentive {incetive}")
             incentive.append(incetive)
         return incentive
+    def distribute_incentive_3(self):
+        incentive = []
+        for j, agent in enumerate(self.all_agents):
+            all_pollinators = 0
+            final_incentive = 0
+            for i, land in enumerate(agent.land_cells_owned):
+
+                if land.bag_pointer_actual==100:
+                    final_incentive-=0.25
+                if i==0 and  land.bag_pointer_actual==50:
+                    final_incentive+=0.25
+                if i == 1 and land.bag_pointer_actual == 20:
+                    final_incentive += 0.25
+                if i==2 and land.bag_pointer_actual == 60:
+                    final_incentive+=0.25
+
+                # print(f"agent {j} got {all_pollinators/len(agent.land_cells_owned)} and got this incentive {incetive}")
+            incentive.append(final_incentive)
+        return incentive
+    def distribute_incentive_4(self):
+        incentive = []
+        for j, agent in enumerate(self.all_agents):
+            final_incentive = 0
+            for i, land in enumerate(agent.land_cells_owned):
+
+                if land.bag_pointer_actual != 100 and land.bag_pointer_actual!=0:
+                    final_incentive += 0.2
+                else:
+                    final_incentive -=0.1
+
+
+                # print(f"agent {j} got {all_pollinators/len(agent.land_cells_owned)} and got this incentive {incetive}")
+            incentive.append(final_incentive)
+        return incentive
     def optimise_incentives(self,obs,agents,agent_networks,critics):
 
         import optuna
@@ -71,9 +105,9 @@ class meta_agent():
             self.interpreted_obs=np.array(obs)[self.counter_networks][0][0]
             self.interpreted_agent=a
             study = optuna.create_study(direction='minimize')
-            study.optimize(self.objective, n_trials=60)
+            study.optimize(self.objective, n_trials=120)
             final_incentive.append(study.best_params['x'])
-            print(f"before : \n {self.debugging_obs[1]} \n  after: \n {self.new_state[0][1]}")
+            #print(f"before : \n {self.debugging_obs[1]} \n  after: \n {self.new_state[0][1]}")
             print(f"here are decisions for agent {self.counter_networks} that would result {self.agent_networks[self.counter_networks](th.from_numpy(self.debugging_obs).unsqueeze(0).unsqueeze(0).float().cuda()).mean().item()} here are optimised {self.decisions[self.counter_networks].mean()}")
         return final_incentive
 

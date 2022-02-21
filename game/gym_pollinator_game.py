@@ -74,14 +74,14 @@ class gymDriver(gym.Env):
             cumulative_reward = 0
 
             for i, land in enumerate(agent.land_cells_owned):
-                single_reward = land.last_income / 100 - GlobalParamsGame.GlobalEconomyParams.LAND_UPCOST / 100
+                single_reward = land.last_income / 100 - GlobalParamsGame.GlobalEconomyParams.LAND_UPCOST / 100 #ToDo no minus anymore no upcost
 
                 cumulative_reward += single_reward
 
             money_reward = cumulative_reward / len(agent.land_cells_owned)
             #          0-1   0.9  * 0.9   + 0.1 * 0.35
             reward_internal = agent.alpha * (money_reward) + (1 - agent.alpha) * global_pollinators_reward/2
-            final_reward = money_reward + incentive[j] # incentive 0-1 you can divide by 2 everything#ToDo just money reword for debugging
+            final_reward = money_reward #+ incentive[j] # incentive 0-1 you can divide by 2 everything#ToDo just money reword for debugging
             # agent.money += incentive[j] * 1000
             if render:
                 print(

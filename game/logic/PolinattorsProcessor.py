@@ -61,7 +61,7 @@ class PolinattorsProcessor:
         return True
     def logits(self,x):
         k=8.4
-        xo=0.5
+        xo=0.3
         return  1 / (1 + math.exp(-k*(x-xo)))
 
     # I assume that if you have bees you get pollinated

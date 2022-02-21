@@ -12,10 +12,10 @@ class GlobalParamsGame:
     MAX_CELLS_NUMER = int(WINDOW_HEIGHT / BLOCKSIZE)
 
 class GlobalParamsAi:
-    NUMBER_OF_AGENTS = 4
+    NUMBER_OF_AGENTS = 1
     NUMBER_OF_RANDOM_POLLINATORS = 1
 
 class GlobalEconomyParams:
-    LAND_UPCOST = 50
+    LAND_UPCOST = 40
     STARTING_GOLD =10000
     MAXIMAL_INCOME = 100

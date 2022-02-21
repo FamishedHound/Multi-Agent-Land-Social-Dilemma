@@ -39,7 +39,7 @@ world.seed(1234)
 
 n_states = 213
 n_actions = 1
-capacity = 50000
+capacity = 100
 batch_size = 16
 n_episode = 500
 max_steps = 100000000
@@ -107,28 +107,17 @@ for i_episode in range(n_episode):
 
         # obs = obs.type(FloatTensor)
         randy_random = random.uniform(0, 1)
-        if counters>=13000:
 
-            flag_for_incentive = True
-            incentive =meta.optimise_incentives(obs,worlds_all_agents,maddpg.actors,maddpg.critics)
-        else:
-            incentive =[0,0,0,0] #meta.optimise_incentives(obs,worlds_all_agents,maddpg.actors,epsilon)
+        # if epsilon<0.9 and epsilon>0.5:
+        #     incentive = meta.distribute_incentive_3()
+        # elif epsilon<0.5 and epsilon >0.3:
+        #     incentive = meta.distribute_incentive_4()
         #incentive = meta.optimise_incentives(obs, worlds_all_agents, maddpg.actors, maddpg.critics)
         #incentive = meta.optimise_incentives(obs, worlds_all_agents, maddpg.actors, maddpg.critics)
         #incentive = [0, 0, 0, 0]
-        if epsilon > randy_random:
-            action = maddpg.select_action(obs, worlds_all_agents)
-            flag_for_real_action = False
 
-            action = make_random_action(worlds_all_agents)
 
-        else:
-            # maddpg.batch_size= 32
-            flag_for_real_action = True
-            action = maddpg.select_action(obs, worlds_all_agents)
 
-        agents_actions = ''.join(f'''agent {i} made actions {a} \n ''' for i, a in enumerate(action))
-        print(agents_actions)
         # print(f" action for the game {agents_actions}")
         # action = th.from_numpy(action_np)
         # obs_, reward, done, _ = world.step(action, randy_random_2)
@@ -138,15 +127,14 @@ for i_episode in range(n_episode):
             # maddpg.save_weights_of_networks("before_curriculum")
             print("The COUNTER IS {}".format(counters))
         # if epsilon<=0.4:
-        if counters>=4000 and counters<=10000:
-            incentive = meta.distribute_incetive()
-        elif counters>=10000 and counters<13000:
-            incentive = meta.distribute_incentive_2()
-                # if counters==7999:
-                #     maddpg.save_weights_of_networks("after_curriculum")
-                #     exit("Training completed")
+        # if epsilon==0.3 and counters<=10000:
+        #     incentive = meta.distribute_incetive()
+        # elif counters>=10000 and counters<16000:
+        #     incentive = meta.distribute_incentive_2()
+        # elif counters>=17000 and counters<20000:
+        #     incentive = meta.distribute_incentive_4()
 
-        if counters>=18000:
+        if counters>=32000:
             import pickle
 
             with open('before_incentive_reward2.pkl', 'wb') as f:
@@ -157,16 +145,22 @@ for i_episode in range(n_episode):
                 pickle.dump(difference_in_reward, f)
             exit(1)
 
-        # if counters>8000:
+        # if counters>=20000:
         #
-        #     model.learn(10, maddpg, worlds_all_agents, obs, meta, world, progress_bar=True)
-        #     incentive = model.best_action()
-        #     buffer= incentive
-        #     #counters=0
-        #     #maddpg.memory.flush_memory()
-        #     print(f"BEST ACTION {incentive}")
-        #     print(f"agent target is \n {meta.target}")
-        #     print(meta.target)
+        #     flag_for_incentive = True
+        #     incentive =meta.optimise_incentives(obs,worlds_all_agents,maddpg.actors,maddpg.critics)
+
+        if epsilon > randy_random:
+            action = maddpg.select_action(obs, worlds_all_agents)
+            flag_for_real_action = False
+            agents_actions = ''.join(f'''agent {i} made actions {a} \n ''' for i, a in enumerate(action))
+            print(agents_actions)
+            action = make_random_action(worlds_all_agents)
+
+        else:
+            # maddpg.batch_size= 32
+            flag_for_real_action = True
+            action = maddpg.select_action(obs, worlds_all_agents)
         (obs_, global_state_), (reward,reward_without_incentive), done, _ = world.step(action, flag_for_real_action, incentive, True)
 
         if not flag_for_incentive and flag_for_real_action  :
