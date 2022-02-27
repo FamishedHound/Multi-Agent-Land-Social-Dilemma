@@ -40,9 +40,9 @@ class EconomyManager:
 
         for land in agent.land_cells_owned:
 
-            #if self.polinator_processor.get_pollinated(land): ToDo Changed
+            if self.polinator_processor.get_pollinated(land):# ToDo Changed
                 #print(f"land {(land.x, land.y)}")
-            if self.get_new_pollinated(land):
+            #if self.get_new_pollinated(land):
                 this_land_income = (100 - land.bag_pointer_actual) / 100 * GlobalEconomyParams.MAXIMAL_INCOME
                 total_gross_income += this_land_income
                 land.was_pollinated = True

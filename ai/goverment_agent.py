@@ -9,7 +9,7 @@ class meta_agent():
     def __init__(self, agent_networks, q_value_networks,all_agents):
         board_size = int(GlobalParamsGame.GlobalParamsGame.WINDOW_HEIGHT / GlobalParamsGame.GlobalParamsGame.BLOCKSIZE)
         self.target = np.random.uniform(0,1, (4))
-        self.target = [0.7,0.9,0.1,0.5]#[round(x,1) for x in self.target]
+        self.target = [0.9,0.9,0.1,0.5]#[round(x,1) for x in self.target]
         self.budget = 0
         self.agent_networks = agent_networks
         self.q_value_networks = q_value_networks
@@ -105,7 +105,7 @@ class meta_agent():
             self.interpreted_obs=np.array(obs)[self.counter_networks][0][0]
             self.interpreted_agent=a
             study = optuna.create_study(direction='minimize')
-            study.optimize(self.objective, n_trials=120)
+            study.optimize(self.objective, n_trials=220)
             final_incentive.append(study.best_params['x'])
             #print(f"before : \n {self.debugging_obs[1]} \n  after: \n {self.new_state[0][1]}")
             print(f"here are decisions for agent {self.counter_networks} that would result {self.agent_networks[self.counter_networks](th.from_numpy(self.debugging_obs).unsqueeze(0).unsqueeze(0).float().cuda()).mean().item()} here are optimised {self.decisions[self.counter_networks].mean()}")
@@ -115,8 +115,8 @@ class meta_agent():
     #make decision somehow impact the critic
     def objective(self,trial):
         x = trial.suggest_float('x', -1, 1)
-        multiplier = 10
-        new_incentive = self.get_agents_land_positions(self.interpreted_agent, self.interpreted_obs, x)
+        multiplier = 1
+        new_incentive = self.get_agents_land_positions(self.interpreted_agent, self.interpreted_obs, x*multiplier)
         self.new_state = th.cat([th.from_numpy(self.interpreted_obs.copy()).float().unsqueeze(0), th.from_numpy(new_incentive.copy()).float().unsqueeze(0)], dim=0).unsqueeze(0)
         self.decisions[self.counter_networks] = self.agent_networks[self.counter_networks](
            self.new_state.cuda()).squeeze().data

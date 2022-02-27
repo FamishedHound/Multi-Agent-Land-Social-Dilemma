@@ -39,7 +39,7 @@ world.seed(1234)
 
 n_states = 213
 n_actions = 1
-capacity = 100
+capacity = 5000 #ToDo was 500
 batch_size = 16
 n_episode = 500
 max_steps = 100000000
@@ -86,10 +86,10 @@ def handle_exploration():
         if round(epsilon * 1000) % 211 == 0 and epsilon == 0.3:
             plt.plot(cum_reward)
             plt.show()
-        if epsilon > 0.3:
+        if epsilon > 0.4:
             epsilon -= 1e-4 # 0.0001
         else:
-            epsilon = 0.3
+            epsilon = 0.4
 
 
 for i_episode in range(n_episode):
@@ -108,9 +108,9 @@ for i_episode in range(n_episode):
         # obs = obs.type(FloatTensor)
         randy_random = random.uniform(0, 1)
 
-        # if epsilon<0.9 and epsilon>0.5:
-        #     incentive = meta.distribute_incentive_3()
-        # elif epsilon<0.5 and epsilon >0.3:
+        # if epsilon<0.9 and epsilon>0.3:
+        #     incentive = meta.distribute_incetive()
+        # if epsilon<0.5 and counters<=19700:
         #     incentive = meta.distribute_incentive_4()
         #incentive = meta.optimise_incentives(obs, worlds_all_agents, maddpg.actors, maddpg.critics)
         #incentive = meta.optimise_incentives(obs, worlds_all_agents, maddpg.actors, maddpg.critics)
@@ -126,15 +126,16 @@ for i_episode in range(n_episode):
             counters += 1
             # maddpg.save_weights_of_networks("before_curriculum")
             print("The COUNTER IS {}".format(counters))
-        # if epsilon<=0.4:
+
         # if epsilon==0.3 and counters<=10000:
         #     incentive = meta.distribute_incetive()
-        # elif counters>=10000 and counters<16000:
-        #     incentive = meta.distribute_incentive_2()
-        # elif counters>=17000 and counters<20000:
-        #     incentive = meta.distribute_incentive_4()
+        # el
+        if counters>=100 and counters<16000:
+            incentive = meta.distribute_incentive_2()
+        elif counters>=17000 and counters<18500:
+            incentive = meta.distribute_incentive_4()
 
-        if counters>=32000:
+        if counters>=24000:
             import pickle
 
             with open('before_incentive_reward2.pkl', 'wb') as f:
@@ -145,10 +146,10 @@ for i_episode in range(n_episode):
                 pickle.dump(difference_in_reward, f)
             exit(1)
 
-        # if counters>=20000:
-        #
-        #     flag_for_incentive = True
-        #     incentive =meta.optimise_incentives(obs,worlds_all_agents,maddpg.actors,maddpg.critics)
+        if counters>=20000:
+
+            flag_for_incentive = True
+            incentive =meta.optimise_incentives(obs,worlds_all_agents,maddpg.actors,maddpg.critics)
 
         if epsilon > randy_random:
             action = maddpg.select_action(obs, worlds_all_agents)
