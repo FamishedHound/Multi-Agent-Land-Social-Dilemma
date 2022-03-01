@@ -53,10 +53,10 @@ class Actor(nn.Module):
         super(Actor, self).__init__()
         print(f"agent dims {dim_observation*18}")
         self.FC1 = nn.Linear(32, 1024)
-        self.FC2 = nn.Linear(1024, 1024)
+        self.FC2 = nn.Linear(1024, 2048)
         self.FC3 = nn.Linear(1024, 512)
 
-        self.FC4 = nn.Linear(1024, dim_observation)
+        self.FC4 = nn.Linear(2048, dim_observation)
 
     # action output between -2 and 2
     def forward(self, obs):

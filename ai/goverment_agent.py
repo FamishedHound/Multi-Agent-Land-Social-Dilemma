@@ -9,7 +9,7 @@ class meta_agent():
     def __init__(self, agent_networks, q_value_networks,all_agents):
         board_size = int(GlobalParamsGame.GlobalParamsGame.WINDOW_HEIGHT / GlobalParamsGame.GlobalParamsGame.BLOCKSIZE)
         self.target = np.random.uniform(0,1, (4))
-        self.target = [0.9,0.9,0.1,0.5]#[round(x,1) for x in self.target]
+        self.target = [0.35,0.9,0.1,0.5]#[round(x,1) for x in self.target]
         self.budget = 0
         self.agent_networks = agent_networks
         self.q_value_networks = q_value_networks

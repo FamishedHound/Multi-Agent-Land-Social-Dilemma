@@ -39,7 +39,7 @@ world.seed(1234)
 
 n_states = 213
 n_actions = 1
-capacity = 5000 #ToDo was 500
+capacity = 500 #ToDo was 500
 batch_size = 16
 n_episode = 500
 max_steps = 100000000
@@ -73,6 +73,7 @@ incentive_reward = []
 before_incentive_reward = []
 difference_in_reward = []
 reward =[]
+incentive_tracker=[]
 def handle_exploration():
     global epsilon
     if maddpg.episode_done >= batch_size:
@@ -127,23 +128,22 @@ for i_episode in range(n_episode):
             # maddpg.save_weights_of_networks("before_curriculum")
             print("The COUNTER IS {}".format(counters))
 
-        # if epsilon==0.3 and counters<=10000:
+        # if epsilon>=0.4 and counters<=100:
         #     incentive = meta.distribute_incetive()
-        # el
-        if counters>=100 and counters<16000:
-            incentive = meta.distribute_incentive_2()
-        elif counters>=17000 and counters<18500:
+        #
+        # if counters>=100 and counters<16000:
+        #     incentive = meta.distribute_incentive_2()
+        if counters>=15000 and counters<18000:
             incentive = meta.distribute_incentive_4()
 
-        if counters>=24000:
+        if counters>=22000:
             import pickle
 
-            with open('before_incentive_reward2.pkl', 'wb') as f:
-                pickle.dump(before_incentive_reward, f)
-            with open('incentive_reward2.pkl', 'wb') as f:
-                pickle.dump(incentive_reward, f)
-            with open('difference_in_reward2.pkl', 'wb') as f:
+            with open('agents_reward.pkl', 'wb') as f:
                 pickle.dump(difference_in_reward, f)
+            with open('incentive_tracker.pkl', 'wb') as f:
+                pickle.dump(incentive_tracker, f)
+
             exit(1)
 
         if counters>=20000:
@@ -163,13 +163,15 @@ for i_episode in range(n_episode):
             flag_for_real_action = True
             action = maddpg.select_action(obs, worlds_all_agents)
         (obs_, global_state_), (reward,reward_without_incentive), done, _ = world.step(action, flag_for_real_action, incentive, True)
-
-        if not flag_for_incentive and flag_for_real_action  :
-            before_incentive_reward.append(sum(reward)/4)
-            difference_in_reward.append(sum(reward_without_incentive)/4)
-        elif flag_for_incentive :
-            incentive_reward.append(sum(reward)/4)
-            difference_in_reward.append(sum(reward_without_incentive)/4)
+        if counters>=20000:
+            incentive_tracker.append(incentive)
+            difference_in_reward.append(reward_without_incentive)
+        # if not flag_for_incentive and flag_for_real_action  :
+        #     before_incentive_reward.append(sum(reward)/4)
+        #     difference_in_reward.append(sum(reward_without_incentive)/4)
+        # elif flag_for_incentive :
+        #     incentive_reward.append(sum(reward)/4)
+        #     difference_in_reward.append(sum(reward_without_incentive)/4)
         # if counters>=9000:
         #
         #     exit(1)
