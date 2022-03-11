@@ -9,7 +9,7 @@ class meta_agent():
     def __init__(self, agent_networks, q_value_networks,all_agents):
         board_size = int(GlobalParamsGame.GlobalParamsGame.WINDOW_HEIGHT / GlobalParamsGame.GlobalParamsGame.BLOCKSIZE)
         self.target = np.random.uniform(0,1, (4))
-        self.target = [0.35,0.9,0.1,0.5]#[round(x,1) for x in self.target]
+        self.target = [0.1,0.1,0.1,0.1]#[round(x,1) for x in self.target]
         self.budget = 0
         self.agent_networks = agent_networks
         self.q_value_networks = q_value_networks
@@ -105,7 +105,7 @@ class meta_agent():
             self.interpreted_obs=np.array(obs)[self.counter_networks][0][0]
             self.interpreted_agent=a
             study = optuna.create_study(direction='minimize')
-            study.optimize(self.objective, n_trials=220)
+            study.optimize(self.objective, n_trials=1000)
             final_incentive.append(study.best_params['x'])
             #print(f"before : \n {self.debugging_obs[1]} \n  after: \n {self.new_state[0][1]}")
             print(f"here are decisions for agent {self.counter_networks} that would result {self.agent_networks[self.counter_networks](th.from_numpy(self.debugging_obs).unsqueeze(0).unsqueeze(0).float().cuda()).mean().item()} here are optimised {self.decisions[self.counter_networks].mean()}")
@@ -128,4 +128,5 @@ class meta_agent():
 
             incentive_arr[land.x,land.y] = incentive
         incentive_arr = np.rot90(incentive_arr)
+        #print(f"\n\n\n My incentive arr is agent : {self.counter_networks} \n obs {incentive_arr}\n\n\n\n")
         return incentive_arr

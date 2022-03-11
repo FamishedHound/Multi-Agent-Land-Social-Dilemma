@@ -54,13 +54,13 @@ class MADDPG:
         self.use_cuda = th.cuda.is_available()
         self.episodes_before_train = episodes_before_train
         loss_new = nn.BCEWithLogitsLoss()
-        self.GAMMA = 0.2
+        self.GAMMA = 0.01
         self.tau = 0.95
         self.lst1 = []
         self.lst2 = []
         self.var = [1.0 for _ in range(n_agents)]
         self.critic_optimizer = [Adam(x.parameters(),
-                                      lr=1e-3) for x in self.critics]
+                                      lr=1e-4) for x in self.critics]
         self.actor_optimizer = [Adam(x.parameters(),
                                      lr=1e-4) for x in self.actors]
         self.loss_list = []
@@ -187,7 +187,7 @@ class MADDPG:
             # print(f" EPPPPPPPPPPPPPPPPPPPPPPSILON {epsilon}")
             self.steps_done += 1
 
-        update = 50 #ToDo Was 100
+        update = 150 #ToDo Was 100
 
 
             # plt.show()
