@@ -38,12 +38,14 @@ target = [0.15,0.3,0.1,0.5]
 #     a = pickle.load(f)
 # with open('/multiagent-particle-envs/important_pickles/multiple_agents_average_new_baseline.pkl', 'rb') as f:
 #     b = pickle.load(f)
-with open('C:\\Users\\LukePC\\PycharmProjects\\polinators_social_dilema\\multiagent-particle-envs\\important_pickles\\incetives_given.pkl', 'rb') as f:
+with open('C:\\Users\\LukePC\\PycharmProjects\\polinators_social_dilema\\multiagent-particle-envs\\important_pickles\\distance_from_target2.pkl', 'rb') as f:
     c = pickle.load(f)
+with open('C:\\Users\\LukePC\\PycharmProjects\\polinators_social_dilema\\multiagent-particle-envs\\important_pickles\\distance_from_target_baseline2.pkl', 'rb') as f:
+    d = pickle.load(f)
 print(c)
-new_list = [sum(x) for x in c]
-plt.plot(new_list, color = 'red')
-plt.show()
+#new_list = [sum(x) for x in c]
+# plt.plot(c, color = 'red')
+# plt.show()
 # a = a[:2000]
 # b = b[:2000]
 # c = c[:2000]
@@ -52,8 +54,18 @@ agent_0_averages =[]
 agent_1_averages =[]
 agent_2_averages =[]
 agent_3_averages =[]
+agent_0_averages_b =[]
+agent_1_averages_b =[]
+agent_2_averages_b =[]
+agent_3_averages_b =[]
+for average in d:
+    agent_0_averages_b.append(average[0])
 
+    agent_1_averages_b.append(average[1])
 
+    agent_2_averages_b.append(average[2])
+
+    agent_3_averages_b.append(average[3])
 for average in c:
 
     agent_0_averages.append(average[0])
@@ -63,6 +75,13 @@ for average in c:
     agent_2_averages.append(average[2])
 
     agent_3_averages.append(average[3])
+    agent_0_averages_b.append(average[0])
+
+    agent_1_averages_b.append(average[1])
+
+    agent_2_averages_b.append(average[2])
+
+    agent_3_averages_b.append(average[3])
 print(agent_0_averages)
 all_of_them  = [agent_0_averages,agent_1_averages,agent_2_averages,agent_3_averages]
 # for i in range(4):
@@ -77,23 +96,36 @@ all_of_them  = [agent_0_averages,agent_1_averages,agent_2_averages,agent_3_avera
 #     plt.plot(agent, color = 'green')
 #     plt.show()
 
-# def flatten(t):
-#     return [item for sublist in t for item in sublist]
-# plt.axhline(y=0, color='r', linestyle='-')
-# plt.plot(agent_0_averages, color = 'green')
-# plt.show()
-#
-# plt.axhline(y=0, color='r', linestyle='-')
-# plt.plot(agent_1_averages, color = 'green')
-# plt.show()
-#
-# plt.axhline(y=0, color='r', linestyle='-')
-# plt.plot(agent_2_averages, color = 'green')
-# plt.show()
-#
-# plt.axhline(y=0, color='r', linestyle='-')
-# plt.plot(agent_3_averages, color = 'green')
-# plt.show()
+def flatten(t):
+    return [item for sublist in t for item in sublist]
+plt.axhline(y=0, color='r', linestyle='-')
+plt.plot(agent_0_averages, color = 'green')
+plt.show()
+plt.axhline(y=0, color='r', linestyle='-')
+plt.plot(agent_0_averages_b, color = 'black')
+plt.show()
+
+plt.axhline(y=0, color='r', linestyle='-')
+plt.plot(agent_1_averages, color = 'green')
+plt.show()
+plt.axhline(y=0, color='r', linestyle='-')
+plt.plot(agent_1_averages_b, color = 'black')
+
+plt.show()
+
+plt.axhline(y=0, color='r', linestyle='-')
+plt.plot(agent_2_averages, color = 'green')
+plt.show()
+plt.axhline(y=0, color='r', linestyle='-')
+plt.plot(agent_2_averages_b, color = 'black')
+plt.show()
+
+plt.axhline(y=0, color='r', linestyle='-')
+plt.plot(agent_3_averages, color = 'green')
+plt.show()
+plt.axhline(y=0, color='r', linestyle='-')
+plt.plot(agent_3_averages_b, color = 'black')
+plt.show()
 #
 # with open('C:\\Users\\LukePC\\PycharmProjects\\polinators_social_dilema\\multiagent-particle-envs\\important_pickles\\distance_from_target_baseline.pkl', 'rb') as f:
 #     c = pickle.load(f)

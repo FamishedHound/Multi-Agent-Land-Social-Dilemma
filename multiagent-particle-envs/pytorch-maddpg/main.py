@@ -77,6 +77,7 @@ incentive_tracker=[]
 average = []
 baseline = []
 baseline_spending = []
+reward_without_incentive_baseline = []
 def handle_exploration():
     global epsilon
     if maddpg.episode_done >= batch_size:
@@ -154,19 +155,21 @@ for i_episode in range(n_episode):
 
 
 
-        if counters>=3300:
+        if counters>=3200:
             import pickle
 
-            with open('../important_pickles/personal_reward1.pkl', 'wb') as f:
+            with open('../important_pickles/personal_reward2.pkl', 'wb') as f:
                 pickle.dump(difference_in_reward, f)
-            with open('../important_pickles/incetives_given1.pkl', 'wb') as f:
+            with open('../important_pickles/incetives_given2.pkl', 'wb') as f:
                 pickle.dump(incentive_tracker, f)
-            with open('../important_pickles/distance_from_target1.pkl', 'wb') as f:
+            with open('../important_pickles/distance_from_target2.pkl', 'wb') as f:
                 pickle.dump(average, f)
-            with open('../important_pickles/distance_from_target_baseline1.pkl', 'wb') as f:
+            with open('../important_pickles/distance_from_target_baseline2.pkl', 'wb') as f:
                 pickle.dump(baseline, f)
-            with open('../important_pickles/spending1.pkl', 'wb') as f:
+            with open('../important_pickles/spending2.pkl', 'wb') as f:
                 pickle.dump(baseline_spending, f)
+            with open('../important_pickles/baseline_reward_without_incentive2.pkl', 'wb') as f:
+                pickle.dump(reward_without_incentive_baseline, f)
             exit(1)
 
 
@@ -188,10 +191,11 @@ for i_episode in range(n_episode):
             incentive = meta.distribute_incetive()
         if counters >= 100 and counters < 1000:
             incentive = meta.distribute_incentive_2()
-        if counters >= 1000 and counters < 2000:
+        if counters >= 1000 and counters < 2100:
             incentive = []
             spends = []
             avg = []
+
             for i, a in enumerate(worlds_all_agents):
                 average_action = sum([x.item() for x in action[i]]) / len(action[i])
                 print(f" Average :  {average_action} !! ")
@@ -199,10 +203,10 @@ for i_episode in range(n_episode):
                 incentive.append(spending)
                 avg.append(0.1 - average_action)
                 spends.append(spending)
-
-
-            baseline.append(avg)
-            baseline_spending.append(sum(spends))
+            if flag_for_real_action:
+                reward_without_incentive_baseline.append(sum(reward_without_incentive))
+                baseline.append(avg)
+                baseline_spending.append(sum(spends))
 
 
         # if counters >= 1000 and counters < 2000:
@@ -227,7 +231,7 @@ for i_episode in range(n_episode):
             # averages = sum([x.item() for x in action[0]]) / len(action[0])
             # average.append(averages)
             incentive_tracker.append(sum(incentive))
-            difference_in_reward.append(reward_without_incentive)
+            difference_in_reward.append(sum(reward_without_incentive))
             averages = []
             for a in range(len(maddpg.actors)):
                 averages.append((0.15 - sum([x.item() for x in action[a]]) / len(action[a])))
