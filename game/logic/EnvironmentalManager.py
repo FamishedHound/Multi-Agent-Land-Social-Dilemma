@@ -1,9 +1,6 @@
-from random import uniform, randint, choice
+from random import uniform
 
-import scipy
 import numpy as np
-from scipy.spatial import distance
-from math import e
 from game.logic import PolinattorsProcessor
 import math
 

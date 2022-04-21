@@ -1,9 +1,5 @@
 import random
-from typing import List
 
-from scipy.spatial import distance
-
-from ai import Agent
 from game.GlobalParamsGame import GlobalEconomyParams
 
 

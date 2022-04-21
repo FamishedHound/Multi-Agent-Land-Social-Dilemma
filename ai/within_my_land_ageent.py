@@ -2,8 +2,6 @@ from scipy.spatial import distance
 
 from ai.Agent import Agent
 
-from copy import deepcopy
-
 from game.GlobalParamsGame import GlobalEconomyParams
 
 

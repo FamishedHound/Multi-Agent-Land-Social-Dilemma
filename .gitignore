@@ -1,5 +1,5 @@
 \venv
-\images
+multiagent-particle-envs/images
 \maddpg
 .idea\*
 *.pyc

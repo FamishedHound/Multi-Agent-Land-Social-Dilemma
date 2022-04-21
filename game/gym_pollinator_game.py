@@ -1,8 +1,5 @@
-from random import uniform, random, choice, randint
-
 import gym
 import sys
-from time import sleep
 
 import pygame
 from gym import spaces
@@ -80,7 +77,7 @@ class gymDriver(gym.Env):
 
             money_reward = cumulative_reward / len(agent.land_cells_owned)
             #          0-1   0.9  * 0.9   + 0.1 * 0.35
-            reward_internal = agent.alpha * (money_reward) + (1 - agent.alpha) * global_pollinators_reward/2
+            reward_internal = agent.alpha * (money_reward) + (1 - agent.alpha) * global_pollinators_reward/2 #ToDo was /2
             final_reward = reward_internal+incentive[j] # incentive 0-1 you can divide by 2 everything#ToDo just money reword for debugging
             # agent.money += incentive[j] * 1000
             if render:

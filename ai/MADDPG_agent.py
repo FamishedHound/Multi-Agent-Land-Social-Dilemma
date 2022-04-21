@@ -8,13 +8,13 @@ class MADDPGAGENT(Agent):
         super().__init__(id, pos_x, pos_y, number_of_lands, agent_type)
 
         if id ==0:
-            self.alpha=0.99
+            self.alpha=0.2
         elif id==1:
-            self.alpha = 0.3
+            self.alpha = 0.2
         elif id==2:
-            self.alpha=0.8
+            self.alpha=0.2
         else:
-            self.alpha=0.6
+            self.alpha=0.2
         self.trust_factor = round(random.uniform(0.0,1),2)
     def select_action(self, neural_net_output_number):
         a_bag_numbers = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]

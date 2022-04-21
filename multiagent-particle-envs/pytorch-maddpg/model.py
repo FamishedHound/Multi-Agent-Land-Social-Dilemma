@@ -2,8 +2,6 @@ import torch as th
 import torch.nn as nn
 import torch.nn.functional as F
 
-from game.GlobalParamsGame import GlobalParamsAi
-
 
 class Critic(nn.Module):
     def __init__(self, n_agent, dim_observation, batch_size):
@@ -72,7 +70,7 @@ class MultiPurposemetaLearner(nn.Module):
     #in
     def __init__(self):
         super().__init__()
-        self.number_of_agents = GlobalParamsAi.NUMBER_OF_AGENTS
+        self.number_of_agents = 4
         self.FC1 = nn.Linear(16, 512)
         self.FC2 = nn.Linear(512, 1028)
 

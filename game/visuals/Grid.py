@@ -1,12 +1,8 @@
-import os
-
 #import pg as pg
-import image as image
 import pygame
 from pygame import font
 
 from game.GlobalParamsGame import GlobalParamsGame
-from game.visuals.LandCell import LandCell
 
 
 class Grid:

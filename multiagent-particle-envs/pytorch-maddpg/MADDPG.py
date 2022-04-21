@@ -54,7 +54,7 @@ class MADDPG:
         self.use_cuda = th.cuda.is_available()
         self.episodes_before_train = episodes_before_train
         loss_new = nn.BCEWithLogitsLoss()
-        self.GAMMA = 0.01
+        self.GAMMA = 0.1
         self.tau = 0.95
         self.lst1 = []
         self.lst2 = []
@@ -187,7 +187,7 @@ class MADDPG:
             # print(f" EPPPPPPPPPPPPPPPPPPPPPPSILON {epsilon}")
             self.steps_done += 1
 
-        update = 150 #ToDo Was 100
+        update = 250 #ToDo Was 100
 
 
             # plt.show()

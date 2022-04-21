@@ -1,16 +1,23 @@
 import random
 import warnings
-from time import sleep
 
 from MADDPG import MADDPG
 import numpy as np
 import torch as th
 
-from MCTS.mcts.DPW import DPW
+
 from ai.goverment_agent import meta_agent
 from game.gym_pollinator_game import gymDriver
 from params import scale_reward
 
+
+def measure_sum_of_distances_between_matrices(a, b):
+    distances = []
+    for x, y in zip(a, b):
+        for z, c in zip(x, y):
+            distances.append(abs(round(z.item(),1) - round(c.item(),1)))
+
+    return sum(distances)
 
 def make_random_action(all_agents):
     action = []
@@ -31,7 +38,6 @@ n_coop = 2
 world = gymDriver()
 
 reward_record = []
-from ai import goverment_agent
 
 np.random.seed(1234)
 th.manual_seed(1234)
@@ -60,9 +66,11 @@ import matplotlib.pyplot as plt
 worlds_all_agents = world.agent_processor.all_agents
 maddpg = MADDPG(world.n_agents, 12, n_actions, batch_size, capacity,
                 episodes_before_train, worlds_all_agents,False)
+maddpg_fake = MADDPG(world.n_agents, 12, n_actions, batch_size, capacity,
+                episodes_before_train, worlds_all_agents,False)
 FloatTensor = th.cuda.FloatTensor if maddpg.use_cuda else th.FloatTensor
 
-model = DPW(maddpg=maddpg, alpha=0.3, beta=0.2, initial_obs=obs, env=world, K=3 ** 0.5)
+
 meta = meta_agent(None, None, worlds_all_agents)
 counters = 0
 incentive = [0,0,0,0]
@@ -78,6 +86,8 @@ average = []
 baseline = []
 baseline_spending = []
 reward_without_incentive_baseline = []
+
+fake_real_difference = []
 def handle_exploration():
     global epsilon
     if maddpg.episode_done >= batch_size:
@@ -103,14 +113,14 @@ def cirriculum_learning(worlds_all_agents,action,epsilon,counters):
         incentive = meta.distribute_incetive()
     if counters >= 100 and counters < 1200:
         incentive = meta.distribute_incentive_2()
-    if counters >= 1200 and counters < 1500:
+    if counters >= 1200 and counters < 1800:
         incentive = []
         for i, a in enumerate(worlds_all_agents):
             average_action = sum([x.item() for x in action[i]]) / len(action[i])
             print(f" Average :  {average_action} !! ")
-            incentive.append(1 - (abs(0.15 - average_action)))
-            baseline.append(0.15 - average_action)
-    if counters >= 1500 and counters < 2000:
+            incentive.append(1 - (abs(meta.target[i] - average_action)))
+            baseline.append(meta.target[i] - average_action)
+    if counters >= 1800 and counters < 2000:
         incentive = meta.distribute_incentive_4()
     else:
         incentive=[0,0,0,0]
@@ -155,38 +165,52 @@ for i_episode in range(n_episode):
 
 
 
-        if counters>=3200:
+        if counters>=3300:
             import pickle
 
-            with open('../important_pickles/personal_reward2.pkl', 'wb') as f:
+            with open('../important_pickles/fake_planned_20_80_personal_reward45.pkl', 'wb') as f:
                 pickle.dump(difference_in_reward, f)
-            with open('../important_pickles/incetives_given2.pkl', 'wb') as f:
+            with open('../important_pickles/fake_planned_20_80_incetives_given45.pkl', 'wb') as f:
                 pickle.dump(incentive_tracker, f)
-            with open('../important_pickles/distance_from_target2.pkl', 'wb') as f:
+            with open('../important_pickles/fake_planned_20_80_distance_from_target45.pkl', 'wb') as f:
                 pickle.dump(average, f)
-            with open('../important_pickles/distance_from_target_baseline2.pkl', 'wb') as f:
+            with open('../important_pickles/fake_planned_20_80_distance_from_target_baseline45.pkl', 'wb') as f:
                 pickle.dump(baseline, f)
-            with open('../important_pickles/spending2.pkl', 'wb') as f:
+            with open('../important_pickles/fake_planned_20_80_spending45.pkl', 'wb') as f:
                 pickle.dump(baseline_spending, f)
-            with open('../important_pickles/baseline_reward_without_incentive2.pkl', 'wb') as f:
+            with open('../important_pickles/fake_planned_20_80_baseline_reward_without_incentive45.pkl', 'wb') as f:
                 pickle.dump(reward_without_incentive_baseline, f)
             exit(1)
 
 
-
+        if counters>=2100:
+            import pickle
+            with open('../important_pickles/distance_real_fake.pkl', 'wb') as f:
+                pickle.dump(fake_real_difference, f)
+            #incentive,new_ob =meta.optimise_incentives(obs,worlds_all_agents,maddpg.actors,maddpg.critics) #ToDo now Fake one is optimised
+            incentive, new_ob = meta.optimise_incentives(obs, worlds_all_agents, maddpg_fake.actors, maddpg_fake.critics)
+            obs = new_ob
+        print(f"Optimiser gave the following incentive : {incentive}")
         if epsilon > randy_random:
             action = maddpg.select_action(obs, worlds_all_agents)
+            action_fake = maddpg_fake.select_action(obs, worlds_all_agents) #ToDo fake maddpg
             flag_for_real_action = False
             agents_actions = ''.join(f'''agent {i} made actions {a} \n ''' for i, a in enumerate(action))
+            agents_actions_fake = ''.join(f''' FAKE agent {i} made actions {a} \n ''' for i, a in enumerate(action_fake)) #ToDo Fake agent
             print(agents_actions)
+            print(agents_actions_fake) #ToDo Fake agent
             action = make_random_action(worlds_all_agents)
-
+            distance = measure_sum_of_distances_between_matrices(action,action_fake)
+            fake_real_difference.append(distance)
         else:
             # maddpg.batch_size= 32
             flag_for_real_action = True
             action = maddpg.select_action(obs, worlds_all_agents)
+            action_fake = maddpg_fake.select_action(obs, worlds_all_agents)  # ToDo fake maddpg
+            distance = measure_sum_of_distances_between_matrices(action, action_fake)
+            fake_real_difference.append(distance)
 
-
+        print(f"DISTANCE BETWEEN FAKE AND REAL IS {distance}")
         if epsilon <= 0.8 and counters <= 100:
             incentive = meta.distribute_incetive()
         if counters >= 100 and counters < 1000:
@@ -199,9 +223,9 @@ for i_episode in range(n_episode):
             for i, a in enumerate(worlds_all_agents):
                 average_action = sum([x.item() for x in action[i]]) / len(action[i])
                 print(f" Average :  {average_action} !! ")
-                spending = 1 - (abs(0.1 - average_action))
+                spending = 1 - (abs(meta.target[i] - average_action))
                 incentive.append(spending)
-                avg.append(0.1 - average_action)
+                avg.append(meta.target[i] - average_action)
                 spends.append(spending)
             if flag_for_real_action:
                 reward_without_incentive_baseline.append(sum(reward_without_incentive))
@@ -212,11 +236,7 @@ for i_episode in range(n_episode):
         # if counters >= 1000 and counters < 2000:
         #     incentive = meta.distribute_incentive_4()
 
-        if counters>=2100:
 
-            flag_for_incentive = True
-            incentive =meta.optimise_incentives(obs,worlds_all_agents,maddpg.actors,maddpg.critics)
-            print(f"Optimiser gave the following incentive : {incentive}")
             # average_action = sum([x.item() for x in action[0]]) / len(action[0])
             # print(f" Average :  {average_action} !! ")
             # incentive = [1-(abs(0.15-average_action))]
@@ -234,7 +254,7 @@ for i_episode in range(n_episode):
             difference_in_reward.append(sum(reward_without_incentive))
             averages = []
             for a in range(len(maddpg.actors)):
-                averages.append((0.15 - sum([x.item() for x in action[a]]) / len(action[a])))
+                averages.append((meta.target[a] - sum([x.item() for x in action[a]]) / len(action[a])))
             average.append(averages)
         # if not flag_for_incentive and flag_for_real_action  :
         #     before_incentive_reward.append(sum(reward)/4)
@@ -267,11 +287,14 @@ for i_episode in range(n_episode):
         # obs_ = np.concatenate([np.expand_dims(obs[2], 0), obs_], 0)
         #ToDo switch around obs -> old version obs,obs_ , new obs_, obs
         maddpg.memory.push(obs, action, obs_, reward, global_state, global_state_)
+        maddpg_fake.memory.push(obs, action, obs_, reward, global_state, global_state_) #ToDo fake maddpg
         obs = next_obs
         global_state = next_global_state
         cum_reward.append(sum(reward))
         c_loss, a_loss = maddpg.update_policy(worlds_all_agents, epsilon)
+        c_loss, a_loss = maddpg_fake.update_policy(worlds_all_agents, epsilon)#ToDo fake maddpg
         maddpg.episode_done += 1
+        maddpg_fake.episode_done += 1
 
         handle_exploration()
         print(f"actual epsilon {epsilon}")
@@ -292,3 +315,4 @@ for i_episode in range(n_episode):
                   encounter_reward))
 
 world.close()
+

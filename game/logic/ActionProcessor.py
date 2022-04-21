@@ -1,8 +1,7 @@
 import random
 
-from ai.Agent import Agent
 from game.logic.PolinattorsProcessor import PolinattorsProcessor
-import numpy as np
+
 
 class ActionProcessor:
 

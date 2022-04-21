@@ -1,12 +1,7 @@
-from ai.Agent import Agent
 from ai.MADDPG_agent import MADDPGAGENT
-from ai.rule_based_agent import RuleBasedAgent
-from ai.within_my_land_ageent import LandAgent
 from game.GlobalParamsGame import GlobalParamsAi, GlobalParamsGame
 from game.visuals.Grid import Grid
 import random
-
-from game.visuals.LandCell import LandCell
 
 
 class AgentProcessor:
