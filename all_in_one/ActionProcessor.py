@@ -1,6 +1,6 @@
 import random
 
-from game.logic.PolinattorsProcessor import PolinattorsProcessor
+from PolinattorsProcessor import PolinattorsProcessor
 
 
 class ActionProcessor:

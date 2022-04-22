@@ -2,12 +2,12 @@
 import pygame
 from pygame import font
 
-from game.GlobalParamsGame import GlobalParamsGame
+from GlobalParamsGame import GlobalParamsGame
 
 
 class Grid:
     def __init__(self):
-        from game.visuals.LandCell import LandCell
+        from LandCell import LandCell
         self.all_cells = {(x, y): LandCell(x, y) for x in range(GlobalParamsGame.MAX_CELLS_NUMER) for y in
                           range(GlobalParamsGame.MAX_CELLS_NUMER)}
         self.image = pygame.image.load(

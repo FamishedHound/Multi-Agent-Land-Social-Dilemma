@@ -4,13 +4,13 @@ import sys
 import pygame
 from gym import spaces
 
-from game.economy.EconomyManager import EconomyManager
-from game.logic.ActionProcessor import ActionProcessor
-from game.logic.AgentProcessor import AgentProcessor
-from game.logic.EnvironmentalManager import EnvironmentalManager
-from game.logic.PolinattorsProcessor import PolinattorsProcessor
-from game.visuals.Grid import Grid
-from game import GlobalParamsGame
+from EconomyManager import EconomyManager
+from ActionProcessor import ActionProcessor
+from AgentProcessor import AgentProcessor
+from EnvironmentalManager import EnvironmentalManager
+from PolinattorsProcessor import PolinattorsProcessor
+from Grid import Grid
+import GlobalParamsGame
 import numpy as np
 import torch
 

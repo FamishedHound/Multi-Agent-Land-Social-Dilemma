@@ -1,10 +1,10 @@
 import numpy as np
 
-from game import GlobalParamsGame
+import GlobalParamsGame
 import torch as th
 
 
-class meta_agent():
+class goverment_agent():
     def __init__(self, agent_networks, q_value_networks, all_agents):
         board_size = int(GlobalParamsGame.GlobalParamsGame.WINDOW_HEIGHT / GlobalParamsGame.GlobalParamsGame.BLOCKSIZE)
 

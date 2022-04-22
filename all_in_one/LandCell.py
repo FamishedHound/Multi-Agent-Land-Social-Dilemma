@@ -1,6 +1,6 @@
 import pygame
 
-from game.GlobalParamsGame import GlobalParamsGame
+from GlobalParamsGame import GlobalParamsGame
 
 
 class LandCell:

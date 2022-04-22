@@ -3,8 +3,8 @@ import random
 
 from scipy.spatial import distance
 
-from game.visuals.Grid import Grid
-from game.GlobalParamsGame import GlobalParamsAi, GlobalParamsGame
+from Grid import Grid
+from GlobalParamsGame import GlobalParamsAi, GlobalParamsGame
 
 #Utility and pollination range and formuka
 class PolinattorsProcessor:

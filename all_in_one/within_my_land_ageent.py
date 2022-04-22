@@ -1,6 +1,6 @@
 from scipy.spatial import distance
 
-from ai.Agent import Agent
+from all_in_one.Agent import Agent
 
 from game.GlobalParamsGame import GlobalEconomyParams
 

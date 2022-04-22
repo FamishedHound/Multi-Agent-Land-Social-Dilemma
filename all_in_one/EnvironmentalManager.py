@@ -1,7 +1,7 @@
 from random import uniform
 
 import numpy as np
-from game.logic import PolinattorsProcessor
+import PolinattorsProcessor
 import math
 
 #Spreading manager

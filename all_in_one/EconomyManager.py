@@ -1,6 +1,6 @@
 import random
 
-from game.GlobalParamsGame import GlobalEconomyParams
+from GlobalParamsGame import GlobalEconomyParams
 
 
 class EconomyManager:

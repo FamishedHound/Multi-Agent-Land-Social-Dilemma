@@ -3,7 +3,7 @@ import copy
 import numpy as np
 from scipy.spatial import distance
 
-from ai.Agent import Agent
+from all_in_one.Agent import Agent
 
 
 class RuleBasedAgent(Agent):

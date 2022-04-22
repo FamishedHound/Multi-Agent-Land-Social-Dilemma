@@ -1,20 +1,20 @@
 import random
 
-from ai.Agent import Agent
+from Agent import Agent
 
 
-class MADDPGAGENT(Agent):
+class MADDPG_agent(Agent):
     def __init__(self, id, pos_x: int, pos_y: int, number_of_lands: int, agent_type):
         super().__init__(id, pos_x, pos_y, number_of_lands, agent_type)
 
         if id ==0:
-            self.alpha=0.2
+            self.alpha=0.6
         elif id==1:
-            self.alpha = 0.2
+            self.alpha = 0.6
         elif id==2:
-            self.alpha=0.2
+            self.alpha=0.6
         else:
-            self.alpha=0.2
+            self.alpha=0.6
         self.trust_factor = round(random.uniform(0.0,1),2)
     def select_action(self, neural_net_output_number):
         a_bag_numbers = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]

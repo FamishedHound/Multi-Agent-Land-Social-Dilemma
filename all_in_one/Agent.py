@@ -2,8 +2,8 @@ import random
 
 from typing import List
 
-from game.GlobalParamsGame import GlobalEconomyParams
-from game.visuals.LandCell import LandCell
+from GlobalParamsGame import GlobalEconomyParams
+from LandCell import LandCell
 
 
 class Agent:
